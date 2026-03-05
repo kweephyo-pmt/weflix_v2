@@ -49,7 +49,7 @@ function Series() {
             : 'Stream trending TV shows and series free on WeFlix. Discover the most popular, top-rated, and newest shows across all genres.'
         }
       />
-      {/* Page header */}}
+      {/* Page header */}
       <div className="px-4 sm:px-6 pt-6 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

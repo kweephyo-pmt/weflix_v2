@@ -186,7 +186,7 @@ function SearchPage() {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search movies, TV shows, genres…"
-          className="w-full bg-gray-800/60 border border-gray-700/50 text-white pl-11 pr-10 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all duration-200"
+          className="w-full bg-gray-800/60 border border-gray-700/50 text-white pl-11 pr-10 py-3.5 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all duration-200"
         />
         {loading && items.length === 0 && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">

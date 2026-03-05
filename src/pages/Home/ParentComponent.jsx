@@ -51,7 +51,7 @@ function ParentComponent() {
       {scrollPosition > 300 && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-20 md:bottom-4 right-4 z-50 text-white p-3 rounded-full bg-white/10 hover:bg-white/20 shadow-lg hover:scale-110 transition-all duration-300"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-4 right-4 z-50 text-white p-3 rounded-full bg-white/10 hover:bg-white/20 shadow-lg hover:scale-110 transition-all duration-300"
           aria-label="Scroll to Top"
         >
           <BiUpArrowAlt className="text-2xl" />
@@ -59,12 +59,12 @@ function ParentComponent() {
       )}
 
       {/* Page content */}
-      <div className="md:pl-[84px] pb-16 md:pb-0">
+      <div className="md:pl-[84px] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <Outlet />
       </div>
 
       {/* Mobile bottom navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0b0f18]/95 backdrop-blur-md border-t border-white/[0.07] flex items-center justify-around px-2 py-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0b0f18]/95 backdrop-blur-md border-t border-white/[0.07] flex items-center justify-around px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {[
           { id: 'home',   icon: BiHomeAlt,   label: 'Home'    },
           { id: 'movies', icon: BiMoviePlay, label: 'Movies'  },

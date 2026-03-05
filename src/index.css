@@ -5,6 +5,7 @@
 
 body {
   background-color: black;
+  overflow-x: hidden;
 }
 .fade-in {
     animation: fadeIn 0.2s ease-out forwards;

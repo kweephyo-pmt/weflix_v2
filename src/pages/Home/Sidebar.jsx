@@ -36,27 +36,30 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
       group fixed top-0 left-0 h-full z-50
       hidden md:flex flex-col
       w-[84px] hover:w-[260px]
-      bg-[#0b0f18]
-      border-r border-white/[0.05]
+      bg-gray-900/95 backdrop-blur-xl
+      border-r border-white/10
+      shadow-2xl shadow-black/30
       overflow-hidden
       transition-[width] duration-300 ease-in-out
       select-none
     ">
 
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none" />
+
       {/* Logo */}
-      <button onClick={() => onNavigate('home')} className="flex items-center gap-4 px-[18px] pt-8 pb-9 shrink-0 text-left hover:opacity-80 transition-opacity">
-        <div className="flex items-center justify-center w-[48px] h-[48px] rounded-2xl bg-gradient-to-br from-red-500 to-red-700 shadow-lg shadow-red-900/40 shrink-0">
+      <button onClick={() => onNavigate('home')} className="relative flex items-center gap-4 px-[18px] pt-8 pb-8 shrink-0 text-left hover:opacity-90 transition-opacity">
+        <div className="flex items-center justify-center w-[48px] h-[48px] rounded-2xl bg-gradient-to-br from-red-500 to-red-700 shadow-lg shadow-red-900/40 ring-1 ring-white/10 shrink-0">
           <FaPlay className="text-white text-[15px] ml-0.5" />
         </div>
         <div className="flex flex-col leading-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
           <span className="text-white font-black text-[20px] tracking-tight">WeFlix</span>
-          <span className="text-red-500/60 text-[10px] font-semibold tracking-[0.22em] uppercase mt-0.5">Streaming</span>
+          <span className="text-red-400/70 text-[10px] font-semibold tracking-[0.22em] uppercase mt-0.5">Streaming</span>
         </div>
       </button>
 
       {/* Nav section label */}
       <div className="px-[18px] mb-1 shrink-0">
-        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[11px] font-bold tracking-[0.22em] uppercase text-gray-600 whitespace-nowrap">
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[11px] font-bold tracking-[0.22em] uppercase text-gray-500 whitespace-nowrap">
           Menu
         </span>
       </div>
@@ -71,12 +74,12 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
               onClick={() => onNavigate(id)}
               title={label}
               className={`
-                relative flex items-center gap-4 px-4 py-4 rounded-xl
+                relative flex items-center gap-4 px-4 py-3.5 rounded-2xl
                 w-full text-[14px] font-medium whitespace-nowrap
-                transition-all duration-150 focus:outline-none
+                transition-all duration-200 focus:outline-none
                 ${isActive
-                  ? 'bg-red-600/15 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-white/[0.06]'
+                  ? 'bg-red-500/15 text-white ring-1 ring-red-500/35 shadow-sm shadow-red-950/30'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }
               `}
             >
@@ -84,7 +87,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
               {isActive && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-red-500" />
               )}
-              <Icon className={`text-[26px] shrink-0 transition-colors duration-150 ${isActive ? 'text-red-400' : ''}`} />
+              <Icon className={`text-[24px] shrink-0 transition-colors duration-200 ${isActive ? 'text-red-400' : ''}`} />
               <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
                 {label}
               </span>
@@ -96,11 +99,11 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
       {/* Categories section — only on movies / series */}
       {showCategories && (
         <>
-          <div className="mx-[18px] h-px bg-white/[0.07] shrink-0" />
+          <div className="mx-[18px] h-px bg-white/10 shrink-0" />
           <div className="flex-1 flex flex-col min-h-0 pt-4 pb-4">
             {/* Section label */}
             <div className="px-[18px] mb-2 shrink-0">
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[11px] font-bold tracking-[0.22em] uppercase text-gray-600 whitespace-nowrap">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[11px] font-bold tracking-[0.22em] uppercase text-gray-500 whitespace-nowrap">
                 Genres
               </span>
             </div>
@@ -114,12 +117,12 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                     onClick={() => onGenreSelect && onGenreSelect(genre.id)}
                     title={genre.name}
                     className={`
-                      relative flex items-center gap-4 px-4 py-3 rounded-xl
+                      relative flex items-center gap-4 px-4 py-2.5 rounded-2xl
                       w-full text-[13px] font-medium whitespace-nowrap
-                      transition-all duration-150 focus:outline-none text-left
+                      transition-all duration-200 focus:outline-none text-left
                       ${isActiveGenre
-                        ? 'bg-red-600/15 text-white'
-                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.05]'
+                        ? 'bg-red-500/15 text-white ring-1 ring-red-500/30'
+                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
                       }
                     `}
                   >
@@ -127,8 +130,8 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-red-500" />
                     )}
                     <span className={`
-                      w-2 h-2 rounded-full shrink-0 transition-all duration-150
-                      ${isActiveGenre ? 'bg-red-400' : 'bg-gray-700 group-hover:bg-gray-600'}
+                      w-2 h-2 rounded-full shrink-0 transition-all duration-200
+                      ${isActiveGenre ? 'bg-red-400' : 'bg-gray-700'}
                     `} />
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
                       {genre.name}
@@ -142,7 +145,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                 <>
                   <div className="mx-1 my-2 h-px bg-white/[0.06] shrink-0" />
                   <div className="px-4 mb-1 shrink-0">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[10px] font-bold tracking-[0.22em] uppercase text-gray-700 whitespace-nowrap">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[10px] font-bold tracking-[0.22em] uppercase text-gray-600 whitespace-nowrap">
                       Special
                     </span>
                   </div>
@@ -154,12 +157,12 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                         onClick={() => onGenreSelect && onGenreSelect(cat.id)}
                         title={cat.name}
                         className={`
-                          relative flex items-center gap-4 px-4 py-3 rounded-xl
+                          relative flex items-center gap-4 px-4 py-2.5 rounded-2xl
                           w-full text-[13px] font-medium whitespace-nowrap
-                          transition-all duration-150 focus:outline-none text-left
+                          transition-all duration-200 focus:outline-none text-left
                           ${isActive
-                            ? 'bg-red-600/15 text-white'
-                            : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.05]'
+                            ? 'bg-red-500/15 text-white ring-1 ring-red-500/30'
+                            : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
                           }
                         `}
                       >

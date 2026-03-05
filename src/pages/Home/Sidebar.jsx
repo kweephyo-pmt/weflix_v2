@@ -31,7 +31,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
   return (
     <aside className="
       group fixed top-0 left-0 h-full z-50
-      flex flex-col
+      hidden md:flex flex-col
       w-[84px] hover:w-[260px]
       bg-[#0b0f18]
       border-r border-white/[0.05]
@@ -41,7 +41,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
     ">
 
       {/* Logo */}
-      <div className="flex items-center gap-4 px-[18px] pt-8 pb-9 shrink-0">
+      <button onClick={() => onNavigate('home')} className="flex items-center gap-4 px-[18px] pt-8 pb-9 shrink-0 text-left hover:opacity-80 transition-opacity">
         <div className="flex items-center justify-center w-[48px] h-[48px] rounded-2xl bg-gradient-to-br from-red-500 to-red-700 shadow-lg shadow-red-900/40 shrink-0">
           <FaPlay className="text-white text-[15px] ml-0.5" />
         </div>
@@ -49,7 +49,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
           <span className="text-white font-black text-[20px] tracking-tight">WeFlix</span>
           <span className="text-red-500/60 text-[10px] font-semibold tracking-[0.22em] uppercase mt-0.5">Streaming</span>
         </div>
-      </div>
+      </button>
 
       {/* Nav section label */}
       <div className="px-[18px] mb-1 shrink-0">

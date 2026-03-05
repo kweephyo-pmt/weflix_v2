@@ -3,26 +3,87 @@ import { toDetailPath } from './urlUtils';
 import HeroBanner from './HeroBanner';
 import TrendingRow from './TrendingRow';
 
+const SectionDivider = ({ label }) => (
+  <div className="flex items-center gap-4 px-4 sm:px-6 mb-8 mt-4">
+    <div className="flex-1 h-px bg-white/[0.05]" />
+    <span className="text-gray-600 text-[11px] font-bold uppercase tracking-[0.25em]">{label}</span>
+    <div className="flex-1 h-px bg-white/[0.05]" />
+  </div>
+);
+
 export default function HomePage() {
   const navigate = useNavigate();
 
   const handleSelect = (item, type) => {
-    navigate(toDetailPath(type === 'tv' ? 'tv' : 'movie', item.id, item.title || item.name));
+    const mediaType = item.media_type ?? type;
+    navigate(toDetailPath(mediaType === 'tv' ? 'tv' : 'movie', item.id, item.title || item.name));
   };
 
+  const goMovies = () => navigate('/movies');
+  const goSeries = () => navigate('/series');
+
   return (
-    <div className="bg-black min-h-screen">
+    <div className="bg-[#0a0c12] min-h-screen">
       <HeroBanner />
-      <div className="pt-10">
+
+      <div className="pt-10 pb-8">
+        {/* ── Movies ── */}
         <TrendingRow
           title="Trending Movies"
           type="movie"
+          variant="trending"
+          accent="#ef4444"
           onSelect={handleSelect}
+          onSeeAll={goMovies}
         />
+        <TrendingRow
+          title="Top 10 Movies This Week"
+          type="movie"
+          variant="popular"
+          showRank
+          originalLanguage={['en', 'zh', 'ko', 'ja']}
+          accent="#ef4444"
+          onSelect={handleSelect}
+          onSeeAll={goMovies}
+        />
+        <TrendingRow
+          title="Now Playing in Theaters"
+          type="movie"
+          variant="now_playing"
+          accent="#f59e0b"
+          onSelect={handleSelect}
+          onSeeAll={goMovies}
+        />
+
+        <SectionDivider label="TV Shows" />
+
+        {/* ── TV ── */}
         <TrendingRow
           title="Trending TV Shows"
           type="tv"
+          variant="trending"
+          accent="#8b5cf6"
           onSelect={handleSelect}
+          onSeeAll={goSeries}
+        />
+        <TrendingRow
+          title="Top 10 Series This Week"
+          type="tv"
+          variant="popular"
+          showRank
+          originalLanguage={['en', 'zh', 'ko', 'ja']}
+          accent="#8b5cf6"
+          onSelect={handleSelect}
+          onSeeAll={goSeries}
+        />
+        <TrendingRow
+          title="Airing Today"
+          type="tv"
+          variant="airing_today"
+          originalLanguage="en"
+          accent="#06b6d4"
+          onSelect={handleSelect}
+          onSeeAll={goSeries}
         />
       </div>
     </div>

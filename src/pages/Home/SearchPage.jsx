@@ -11,12 +11,10 @@ const CONFIG = {
   BASE_URL: import.meta.env.VITE_BASE_URL,
   IMAGE_BASE_URL: 'https://image.tmdb.org/t/p/w500',
   DEBOUNCE_DELAY: 350,
-  MAX_RESULTS: 40,
 };
 
 const GRID_CLASSES = 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-1 mt-4';
 
-// Build a flat list of all genres/categories with their nav destination
 const ALL_CATEGORIES = [
   ...GENRES.movie.map(g => ({ ...g, mediaType: 'movie', path: `/movies?genre=${g.id}` })),
   ...GENRES.tv.map(g => ({ ...g, mediaType: 'tv', path: `/series?genre=${g.id}` })),
@@ -24,137 +22,136 @@ const ALL_CATEGORIES = [
   ...SPECIAL_CATEGORIES.tv.map(g => ({ ...g, mediaType: 'tv', path: `/series?genre=${g.id}` })),
 ];
 
-// Deduplicate by name+mediaType
 const UNIQUE_CATEGORIES = ALL_CATEGORIES.filter(
   (cat, idx, arr) => arr.findIndex(c => c.name === cat.name && c.mediaType === cat.mediaType) === idx
 );
 
-// ─── Suggested grid (popular movies) ────────────────────────────────────────
-
-const SuggestedGrid = ({ onSelect }) => {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const url = new URL(`${CONFIG.BASE_URL}/movie/popular`);
-        url.searchParams.append('api_key', CONFIG.API_KEY);
-        url.searchParams.append('language', 'en-US');
-        url.searchParams.append('page', '1');
-        const res = await fetch(url);
-        const data = await res.json();
-        if (!cancelled) setItems(data.results?.slice(0, 20) ?? []);
-      } catch {
-        // silently ignore
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className={GRID_CLASSES}>
-        {Array.from({ length: 14 }).map((_, i) => (
-          <div key={i} className="aspect-[2/3] rounded-lg bg-gray-800/70 animate-pulse flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className={GRID_CLASSES}>
-      {items.map(item => (
-        <ContentCard
-          key={item.id}
-          title={item.title || item.name}
-          poster={item.poster_path ? `${CONFIG.IMAGE_BASE_URL}${item.poster_path}` : ''}
-          rating={item.vote_average}
-          releaseDate={item.release_date}
-          onClick={() => onSelect({ ...item, media_type: 'movie' })}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ─── Search results grid ─────────────────────────────────────────────────────
-
-const ResultsGrid = ({ results, onSelect }) => (
+// ─── Skeleton row ─────────────────────────────────────────────────────────────
+const SkeletonGrid = ({ count = 14 }) => (
   <div className={GRID_CLASSES}>
-    {results.map(item => (
-      <ContentCard
-        key={item.id}
-        title={item.title || item.name}
-        poster={item.poster_path ? `${CONFIG.IMAGE_BASE_URL}${item.poster_path}` : ''}
-        rating={item.vote_average}
-        releaseDate={item.release_date}
-        onClick={() => onSelect(item)}
-      />
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="aspect-[2/3] rounded-lg bg-white/5 animate-pulse" />
     ))}
   </div>
 );
 
+// ─── Infinite scroll hook ─────────────────────────────────────────────────────
+function useInfiniteResults(fetchFn, resetKey) {
+  const [items,   setItems]   = useState([]);
+  const [page,    setPage]    = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(null);
+  const loadingRef  = useRef(false);
+  const seenIds     = useRef(new Set());
+  const sentinelRef = useRef(null);
+
+  // Reset when resetKey changes
+  useEffect(() => {
+    setItems([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+    seenIds.current = new Set();
+  }, [resetKey]);
+
+  // Fetch page
+  useEffect(() => {
+    if (!hasMore || loadingRef.current) return;
+    loadingRef.current = true;
+    setLoading(true);
+
+    fetchFn(page).then(({ results, totalPages }) => {
+      const fresh = (results ?? []).filter(i => {
+        if (seenIds.current.has(i.id)) return false;
+        seenIds.current.add(i.id);
+        return true;
+      });
+      setItems(prev => [...prev, ...fresh]);
+      setHasMore(page < Math.min(totalPages ?? 1, 500) && (results?.length ?? 0) > 0);
+    }).catch(e => {
+      setError(e.message);
+    }).finally(() => {
+      setLoading(false);
+      loadingRef.current = false;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, resetKey]);
+
+  // IntersectionObserver on sentinel
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !loadingRef.current && hasMore) {
+        setPage(p => p + 1);
+      }
+    }, { rootMargin: '200px' });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, items]);
+
+  return { items, loading, error, hasMore, sentinelRef };
+}
+
 // ─── Main SearchPage ──────────────────────────────────────────────────────────
 
 function SearchPage() {
-  const navigate = useNavigate();
-
+  const navigate  = useNavigate();
+  const inputRef  = useRef(null);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const inputRef = useRef(null);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
-  // Auto-focus search bar on mount
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Debounce
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const doSearch = useCallback(async (q) => {
-    if (!q.trim()) { setResults([]); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      const url = new URL(`${CONFIG.BASE_URL}/search/multi`);
-      url.searchParams.append('api_key', CONFIG.API_KEY);
-      url.searchParams.append('query', q);
-      url.searchParams.append('language', 'en-US');
-      url.searchParams.append('page', '1');
-      url.searchParams.append('include_adult', 'false');
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('fetch failed');
-      const data = await res.json();
-      setResults(
-        data.results
-          .filter(i => ['movie', 'tv'].includes(i.media_type))
-          .slice(0, CONFIG.MAX_RESULTS)
-      );
-    } catch {
-      setError('Could not load results. Check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Debounced search
-  useEffect(() => {
-    const id = setTimeout(() => doSearch(query), CONFIG.DEBOUNCE_DELAY);
+    const id = setTimeout(() => setDebouncedQuery(query), CONFIG.DEBOUNCE_DELAY);
     return () => clearTimeout(id);
-  }, [query, doSearch]);
+  }, [query]);
+
+  // ── Search fetch fn ──
+  const searchFetch = useCallback(async (page) => {
+    const url = new URL(`${CONFIG.BASE_URL}/search/multi`);
+    url.searchParams.append('api_key', CONFIG.API_KEY);
+    url.searchParams.append('query', debouncedQuery);
+    url.searchParams.append('page', page);
+    url.searchParams.append('include_adult', 'false');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Search failed');
+    const data = await res.json();
+    return {
+      results: (data.results ?? []).filter(i => ['movie', 'tv'].includes(i.media_type)),
+      totalPages: data.total_pages,
+    };
+  }, [debouncedQuery]);
+
+  // ── Suggested fetch fn ──
+  const suggestedFetch = useCallback(async (page) => {
+    const url = new URL(`${CONFIG.BASE_URL}/trending/all/week`);
+    url.searchParams.append('api_key', CONFIG.API_KEY);
+    url.searchParams.append('page', page);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Fetch failed');
+    const data = await res.json();
+    return {
+      results: (data.results ?? []).filter(i => ['movie', 'tv'].includes(i.media_type)),
+      totalPages: data.total_pages,
+    };
+  }, []);
+
+  const isSearching = debouncedQuery.trim().length > 0;
+
+  const search   = useInfiniteResults(searchFetch,   debouncedQuery);
+  const suggested = useInfiniteResults(suggestedFetch, 'suggested');
+
+  const { items, loading, error, hasMore, sentinelRef } = isSearching ? search : suggested;
 
   const handleSelect = useCallback((item) => {
     const type = item.media_type === 'tv' ? 'tv' : 'movie';
     navigate(toDetailPath(type, item.id, item.title || item.name));
   }, [navigate]);
 
-  // Match categories by name
   const matchedCategories = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
@@ -163,16 +160,12 @@ function SearchPage() {
 
   const clearQuery = () => {
     setQuery('');
-    setResults([]);
+    setDebouncedQuery('');
     inputRef.current?.focus();
   };
 
-  const showSuggested = !query.trim() && !loading;
-  const showResults  = query.trim().length > 0;
-
   return (
-    <div className="min-h-screen bg-black text-white px-8 pt-10 pb-16">
-      {/* Heading */}
+    <div className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-16">
       <h1 className="text-3xl font-bold mb-6">Search</h1>
 
       {/* Search bar */}
@@ -186,12 +179,12 @@ function SearchPage() {
           placeholder="Search movies, TV shows, genres…"
           className="w-full bg-gray-800/60 border border-gray-700/50 text-white pl-11 pr-10 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all duration-200"
         />
-        {loading && (
+        {loading && items.length === 0 && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
             <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        {query && !loading && (
+        {query && (
           <button
             onClick={clearQuery}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
@@ -204,22 +197,9 @@ function SearchPage() {
 
       {error && <p className="mt-3 text-red-500 text-sm">{error}</p>}
 
-      {/* Suggested section */}
-      {showSuggested && (
-        <section className="mt-8">
-          <div className="flex items-baseline gap-3 mb-1">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <span className="w-1 h-5 bg-red-600 rounded-full inline-block" />
-              Suggested for You
-            </h2>
-          </div>
-          <SuggestedGrid onSelect={handleSelect} />
-        </section>
-      )}
-
       {/* Category chips */}
       {matchedCategories.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-1 h-5 bg-red-600 rounded-full inline-block" />
             <h2 className="text-sm font-semibold text-gray-300">Browse by Category</h2>
@@ -233,8 +213,7 @@ function SearchPage() {
               >
                 {cat.mediaType === 'movie'
                   ? <BiMoviePlay className="text-red-400 shrink-0" />
-                  : <BiTv className="text-red-400 shrink-0" />
-                }
+                  : <BiTv className="text-red-400 shrink-0" />}
                 {cat.name}
                 <span className="text-[10px] text-gray-600 ml-0.5">
                   {cat.mediaType === 'movie' ? 'Movies' : 'TV'}
@@ -245,21 +224,54 @@ function SearchPage() {
         </section>
       )}
 
-      {/* Search results */}
-      {showResults && (
-        <section className="mt-8">
-          {results.length > 0 ? (
-            <>
-              <h2 className="text-sm text-gray-400 mb-1">
-                {results.length} result{results.length !== 1 ? 's' : ''} for &quot;{query}&quot;
-              </h2>
-              <ResultsGrid results={results} onSelect={handleSelect} />
-            </>
-          ) : !loading ? (
-            <p className="text-gray-500 mt-8 text-sm">No results found for &ldquo;{query}&rdquo;</p>
-          ) : null}
-        </section>
-      )}
+      {/* Results / Suggested */}
+      <section className="mt-6">
+        {/* Section label */}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="w-1 h-5 bg-red-600 rounded-full inline-block" />
+          {isSearching ? (
+            <h2 className="text-sm text-gray-400">
+              Results for <span className="text-white font-semibold">"{debouncedQuery}"</span>
+            </h2>
+          ) : (
+            <h2 className="text-lg font-semibold">Trending this week</h2>
+          )}
+        </div>
+
+        {/* Initial skeleton */}
+        {items.length === 0 && loading && <SkeletonGrid />}
+
+        {/* No results */}
+        {items.length === 0 && !loading && isSearching && (
+          <p className="text-gray-500 mt-8 text-sm">No results found for "{debouncedQuery}"</p>
+        )}
+
+        {/* Grid */}
+        {items.length > 0 && (
+          <div className={GRID_CLASSES}>
+            {items.map(item => (
+              <ContentCard
+                key={item.id}
+                title={item.title || item.name}
+                poster={item.poster_path ? `${CONFIG.IMAGE_BASE_URL}${item.poster_path}` : ''}
+                rating={item.vote_average}
+                releaseDate={item.release_date || item.first_air_date}
+                onClick={() => handleSelect(item)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} />
+
+        {/* Loading more spinner */}
+        {items.length > 0 && loading && (
+          <div className="flex justify-center py-8">
+            <div className="w-9 h-9 border-[3px] border-red-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+      </section>
     </div>
   );
 }

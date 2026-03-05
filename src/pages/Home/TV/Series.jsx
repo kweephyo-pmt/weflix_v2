@@ -17,6 +17,12 @@ function Series() {
   const genreId = searchParams.get('genre') ? Number(searchParams.get('genre')) : null;
   const sortBy  = searchParams.get('sort') || 'popularity.desc';
 
+  const allCategories = [
+    { id: null, name: 'Trending' },
+    ...GENRES.tv,
+    ...SPECIAL_CATEGORIES.tv,
+  ];
+
   const genre =
     GENRES.tv.find(g => g.id === genreId) ||
     SPECIAL_CATEGORIES.tv.find(g => g.id === genreId);
@@ -27,10 +33,15 @@ function Series() {
     setSearchParams({ genre: genreId, sort: value });
   };
 
+  const handleGenreChip = (id) => {
+    if (id === null) setSearchParams({});
+    else setSearchParams({ genre: id });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Page header */}
-      <div className="px-6 pt-8 pb-3">
+      <div className="px-4 sm:px-6 pt-6 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
@@ -64,6 +75,28 @@ function Series() {
               </select>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Mobile genre chips — hidden on md+ (sidebar handles it there) */}
+      <div className="md:hidden overflow-x-auto hide-scrollbar px-4 pb-3">
+        <div className="flex gap-2 w-max">
+          {allCategories.map(cat => {
+            const isActive = cat.id === null ? genreId === null : genreId === cat.id;
+            return (
+              <button
+                key={cat.id ?? 'trending'}
+                onClick={() => handleGenreChip(cat.id)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  isActive
+                    ? 'bg-red-600 text-white'
+                    : 'bg-white/[0.07] text-gray-400 border border-white/10'
+                }`}
+              >
+                {cat.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 

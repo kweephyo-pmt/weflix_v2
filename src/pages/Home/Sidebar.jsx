@@ -27,6 +27,9 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
   const genreType = activePage === 'movies' ? 'movie' : 'tv';
   const genres = showCategories ? GENRES[genreType] : [];
   const specials = showCategories ? SPECIAL_CATEGORIES[genreType] : [];
+  const adultIds = genreType === 'movie' ? [-3] : [-6];
+  const adultSpecials = specials.filter((cat) => adultIds.includes(cat.id));
+  const regularSpecials = specials.filter((cat) => !adultIds.includes(cat.id));
 
   return (
     <aside className="
@@ -135,7 +138,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
               })}
 
               {/* Special categories: Anime, K-Drama, etc. */}
-              {specials.length > 0 && (
+              {regularSpecials.length > 0 && (
                 <>
                   <div className="mx-1 my-2 h-px bg-white/[0.06] shrink-0" />
                   <div className="px-4 mb-1 shrink-0">
@@ -143,7 +146,49 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                       Special
                     </span>
                   </div>
-                  {specials.map((cat) => {
+                  {regularSpecials.map((cat) => {
+                    const isActive = selectedGenreId === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => onGenreSelect && onGenreSelect(cat.id)}
+                        title={cat.name}
+                        className={`
+                          relative flex items-center gap-4 px-4 py-3 rounded-xl
+                          w-full text-[13px] font-medium whitespace-nowrap
+                          transition-all duration-150 focus:outline-none text-left
+                          ${isActive
+                            ? 'bg-red-600/15 text-white'
+                            : 'text-gray-500 hover:text-gray-200 hover:bg-white/[0.05]'
+                          }
+                        `}
+                      >
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-red-500" />
+                        )}
+                        <span className={`
+                          w-2 h-2 rounded-full shrink-0 transition-all duration-150
+                          ${isActive ? 'bg-red-400' : 'bg-gray-700'}
+                        `} />
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
+                          {cat.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* 18+ categories (not in Special section) */}
+              {adultSpecials.length > 0 && (
+                <>
+                  <div className="mx-1 my-2 h-px bg-white/[0.06] shrink-0" />
+                  <div className="px-4 mb-1 shrink-0">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[10px] font-bold tracking-[0.22em] uppercase text-gray-700 whitespace-nowrap">
+                      18+
+                    </span>
+                  </div>
+                  {adultSpecials.map((cat) => {
                     const isActive = selectedGenreId === cat.id;
                     return (
                       <button

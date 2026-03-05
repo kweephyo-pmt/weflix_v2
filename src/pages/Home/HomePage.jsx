@@ -59,6 +59,16 @@ export default function HomePage() {
 
         {/* ── TV ── */}
         <TrendingRow
+          title="Asian TV Shows"
+          type="tv"
+          variant="popular"
+          originalLanguage={['ko', 'ja', 'zh']}
+          sinceYear={2020}
+          accent="#f97316"
+          onSelect={handleSelect}
+          onSeeAll={goSeries}
+        />
+        <TrendingRow
           title="Trending TV Shows"
           type="tv"
           variant="trending"
@@ -69,19 +79,9 @@ export default function HomePage() {
         <TrendingRow
           title="Top 10 Series This Week"
           type="tv"
-          variant="popular"
+          variant="trending"
           showRank
-          originalLanguage={['en', 'zh', 'ko', 'ja']}
           accent="#8b5cf6"
-          onSelect={handleSelect}
-          onSeeAll={goSeries}
-        />
-        <TrendingRow
-          title="Airing Today"
-          type="tv"
-          variant="airing_today"
-          originalLanguage="en"
-          accent="#06b6d4"
           onSelect={handleSelect}
           onSeeAll={goSeries}
         />

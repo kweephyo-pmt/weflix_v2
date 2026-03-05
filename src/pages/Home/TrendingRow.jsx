@@ -17,7 +17,35 @@ const endpointFor = (type, variant) => {
   return `/trending/${type}/week`; /* default: trending */
 };
 
-function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, originalLanguage = null) {
+/* Build a discover URL when we need real multi-language support */
+const buildDiscoverUrl = (type, variant, langs, minRating, minVotes, sinceYear) => {
+  const url = new URL(`${BASE_URL}/discover/${type}`);
+  url.searchParams.append('api_key', API_KEY);
+  url.searchParams.append('language', 'en-US');
+  url.searchParams.append('with_original_language', langs.join('|'));
+  url.searchParams.append('sort_by', 'popularity.desc');
+  url.searchParams.append('include_adult', 'false');
+  if (minRating > 0) url.searchParams.append('vote_average.gte', minRating);
+  if (minVotes  > 0) url.searchParams.append('vote_count.gte', minVotes);
+  if (sinceYear > 0) {
+    const dateKey = type === 'tv' ? 'first_air_date.gte' : 'primary_release_date.gte';
+    url.searchParams.append(dateKey, `${sinceYear}-01-01`);
+  }
+  if (variant === 'now_playing') {
+    const today = new Date().toISOString().slice(0, 10);
+    const month = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    url.searchParams.append('primary_release_date.gte', month);
+    url.searchParams.append('primary_release_date.lte', today);
+  }
+  if (variant === 'airing_today') {
+    const today = new Date().toISOString().slice(0, 10);
+    url.searchParams.append('air_date.gte', today);
+    url.searchParams.append('air_date.lte', today);
+  }
+  return url;
+};
+
+function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, originalLanguage = null, sinceYear = 0) {
   const [items, setItems]     = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,24 +54,58 @@ function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, origina
     ? (Array.isArray(originalLanguage) ? originalLanguage : [originalLanguage])
     : null;
 
+  const langsKey = JSON.stringify(langs);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const url = new URL(`${BASE_URL}${endpointFor(type, variant)}`);
-        url.searchParams.append('api_key', API_KEY);
-        url.searchParams.append('language', 'en-US');
-        const res  = await fetch(url);
-        const data = await res.json();
+        let results = [];
+
+        if (variant === 'trending' && langs) {
+          // Trending endpoint doesn't support language param — fetch 3 pages and filter client-side
+          const pages = await Promise.all([1, 2, 3].map(page => {
+            const url = new URL(`${BASE_URL}/trending/${type}/week`);
+            url.searchParams.append('api_key', API_KEY);
+            url.searchParams.append('language', 'en-US');
+            url.searchParams.append('page', page);
+            return fetch(url).then(r => r.json());
+          }));
+          results = pages.flatMap(d => d.results ?? []);
+          results = results.filter(i => langs.includes(i.original_language));
+        } else if (langs && langs.length > 1) {
+          // Use discover endpoint — it supports with_original_language natively
+          const url = buildDiscoverUrl(type, variant, langs, minRating, minVotes, sinceYear);
+          // Fetch 2 pages for ranked rows so we have enough cards
+          const [r1, r2] = await Promise.all([
+            fetch(url).then(r => r.json()),
+            (() => { const u2 = new URL(url); u2.searchParams.set('page', '2'); return fetch(u2).then(r => r.json()); })(),
+          ]);
+          results = [...(r1.results ?? []), ...(r2.results ?? [])];
+        } else {
+          const url = new URL(`${BASE_URL}${endpointFor(type, variant)}`);
+          url.searchParams.append('api_key', API_KEY);
+          url.searchParams.append('language', 'en-US');
+          if (langs) url.searchParams.append('with_original_language', langs[0]);
+          const res  = await fetch(url);
+          const data = await res.json();
+          results = data.results ?? [];
+        }
+
         if (!cancelled) {
+          // Deduplicate by id
+          const seen = new Set();
           setItems(
-            (data.results ?? [])
-              .filter(i =>
-                i.poster_path &&
-                (minRating === 0 || i.vote_average >= minRating) &&
-                (minVotes  === 0 || i.vote_count   >= minVotes) &&
-                (langs === null || langs.includes(i.original_language))
-              )
+            results
+              .filter(i => {
+                if (!i.poster_path) return false;
+                if (seen.has(i.id)) return false;
+                seen.add(i.id);
+                return (
+                  (minRating === 0 || i.vote_average >= minRating) &&
+                  (minVotes  === 0 || i.vote_count   >= minVotes)
+                );
+              })
               .slice(0, 20)
           );
         }
@@ -52,7 +114,7 @@ function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, origina
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, variant, minRating, minVotes, JSON.stringify(langs)]);
+  }, [type, variant, minRating, minVotes, sinceYear, langsKey]);
 
   return { items, loading };
 }
@@ -64,12 +126,13 @@ export default function TrendingRow({
   showRank         = false,
   minRating        = 0,
   minVotes         = 0,
+  sinceYear        = 0,
   originalLanguage = null,
   onSelect,
   onSeeAll,
   accent,
 }) {
-  const { items, loading } = useRow(type, variant, minRating, minVotes, originalLanguage);
+  const { items, loading } = useRow(type, variant, minRating, minVotes, originalLanguage, sinceYear);
   const rowRef = useRef(null);
 
   const scroll = (dir) => {

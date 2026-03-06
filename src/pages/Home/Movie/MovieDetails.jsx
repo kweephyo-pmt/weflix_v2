@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback, memo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { fetchMovieDetails } from "../Fetcher";
+import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaFilm } from "react-icons/fa";
 import { BiCalendar, BiTime, BiGlobe } from "react-icons/bi";
 import Loadingspinner from "../resused/Loadingspinner";
@@ -45,7 +46,8 @@ const MetaCard = ({ label, value, icon: Icon }) => (
 
 const MovieDetails = ({ movieId: movieIdProp }) => {
   const { slug } = useParams();
-  const movieId = movieIdProp ?? parseInt(slug);
+  const location = useLocation();
+  const movieId = movieIdProp ?? getIdFromDetailSlug(slug);
   const navigate = useNavigate();
   const [movie,        setMovie]        = useState(null);
   const [loading,      setLoading]      = useState(true);
@@ -69,6 +71,14 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
   }, [movieId]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!movie?.id) return;
+    const canonicalPath = toDetailPath('movie', movie.id, movie.title);
+    if (location.pathname !== canonicalPath) {
+      navigate(canonicalPath, { replace: true });
+    }
+  }, [movie, location.pathname, navigate]);
 
   const formatRuntime = (m) => {
     if (!m) return null;

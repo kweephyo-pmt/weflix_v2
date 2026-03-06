@@ -14,8 +14,15 @@ function App() {
         <Route element={<ParentComponent />}>
           <Route index element={<HomePage />} />
           <Route path="/movies" element={<Movie />} />
+          <Route path="/movies/:genreSlug" element={<Movie />} />
+          <Route path="/movies/:genreSlug/:sortSlug" element={<Movie />} />
           <Route path="/series" element={<Series />} />
+          <Route path="/series/:genreSlug" element={<Series />} />
+          <Route path="/series/:genreSlug/:sortSlug" element={<Series />} />
+          <Route path="/movies/watch/:slug" element={<MovieDetails />} />
+          <Route path="/series/watch/:slug" element={<TvDetails />} />
           <Route path="/search" element={<SearchPage />} />
+          {/* Legacy detail URLs (auto-canonicalized in page components) */}
           <Route path="/movie/:slug" element={<MovieDetails />} />
           <Route path="/tv/:slug" element={<TvDetails />} />
         </Route>

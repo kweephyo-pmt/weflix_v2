@@ -1,8 +1,10 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toDetailPath } from '../urlUtils';
 import ContentGrid from '../ContentGrid';
 import { GENRES, SPECIAL_CATEGORIES } from '../tmdb';
 import { BiTv, BiSortAlt2 } from 'react-icons/bi';
+import { buildBrowsePath, getCategoryBySlug, getSortByFromSlug } from '../urlFilters';
 import SEO from '../SEO';
 
 const SORT_OPTIONS = [
@@ -14,9 +16,17 @@ const SORT_OPTIONS = [
 
 function Series() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const genreId = searchParams.get('genre') ? Number(searchParams.get('genre')) : null;
-  const sortBy  = searchParams.get('sort') || 'popularity.desc';
+  const location = useLocation();
+  const { genreSlug, sortSlug } = useParams();
+  const [searchParams] = useSearchParams();
+
+  const genreFromPath = getCategoryBySlug('tv', genreSlug);
+  const queryGenreId = searchParams.get('genre') ? Number(searchParams.get('genre')) : null;
+  const genreId = genreFromPath?.id ?? queryGenreId;
+
+  const sortFromPath = getSortByFromSlug('tv', sortSlug);
+  const querySortBy = searchParams.get('sort');
+  const sortBy = sortSlug ? sortFromPath : (querySortBy || 'popularity.desc');
 
   const allCategories = [
     { id: null, name: 'Trending' },
@@ -29,13 +39,21 @@ function Series() {
 
   const handleSelect = (item) => navigate(toDetailPath('tv', item.id, item.title || item.name));
 
+  useEffect(() => {
+    const cleanPath = buildBrowsePath('tv', genreId, sortBy);
+    const hasLegacyQuery = searchParams.has('genre') || searchParams.has('sort');
+    const shouldReplace = hasLegacyQuery || location.pathname !== cleanPath;
+    if (shouldReplace) {
+      navigate(cleanPath, { replace: true });
+    }
+  }, [genreId, sortBy, searchParams, location.pathname, navigate]);
+
   const handleSort = (value) => {
-    setSearchParams({ genre: genreId, sort: value });
+    navigate(buildBrowsePath('tv', genreId, value));
   };
 
   const handleGenreChip = (id) => {
-    if (id === null) setSearchParams({});
-    else setSearchParams({ genre: id, sort: 'popularity.desc' });
+    navigate(buildBrowsePath('tv', id, 'popularity.desc'));
   };
 
   return (

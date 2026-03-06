@@ -6,6 +6,7 @@ import { FaSearch, FaTimes } from 'react-icons/fa';
 import { BiMoviePlay, BiTv } from 'react-icons/bi';
 import ContentCard from './ContentCard';
 import { GENRES, SPECIAL_CATEGORIES } from './tmdb';
+import { buildBrowsePath } from './urlFilters';
 import SEO from './SEO';
 
 const CONFIG = {
@@ -18,10 +19,10 @@ const CONFIG = {
 const GRID_CLASSES = 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-1 mt-4';
 
 const ALL_CATEGORIES = [
-  ...GENRES.movie.map(g => ({ ...g, mediaType: 'movie', path: `/movies?genre=${g.id}` })),
-  ...GENRES.tv.map(g => ({ ...g, mediaType: 'tv', path: `/series?genre=${g.id}` })),
-  ...SPECIAL_CATEGORIES.movie.map(g => ({ ...g, mediaType: 'movie', path: `/movies?genre=${g.id}` })),
-  ...SPECIAL_CATEGORIES.tv.map(g => ({ ...g, mediaType: 'tv', path: `/series?genre=${g.id}` })),
+  ...GENRES.movie.map(g => ({ ...g, mediaType: 'movie', path: buildBrowsePath('movie', g.id, 'popularity.desc') })),
+  ...GENRES.tv.map(g => ({ ...g, mediaType: 'tv', path: buildBrowsePath('tv', g.id, 'popularity.desc') })),
+  ...SPECIAL_CATEGORIES.movie.map(g => ({ ...g, mediaType: 'movie', path: buildBrowsePath('movie', g.id, 'popularity.desc') })),
+  ...SPECIAL_CATEGORIES.tv.map(g => ({ ...g, mediaType: 'tv', path: buildBrowsePath('tv', g.id, 'popularity.desc') })),
 ];
 
 const UNIQUE_CATEGORIES = ALL_CATEGORIES.filter(

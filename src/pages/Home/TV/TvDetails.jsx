@@ -5,9 +5,10 @@ import React, {
   memo,
   useRef,
 } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { fetchSeriesDetails, fetchAllEpisodes } from "../Fetcher";
+import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaTv } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv } from "react-icons/bi";
 import Loadingspinner from "../resused/Loadingspinner";
@@ -43,7 +44,8 @@ const MetaCard = ({ label, value }) => (
 
 const TvDetails = ({ tvId: tvIdProp }) => {
   const { slug } = useParams();
-  const tvId = tvIdProp ?? parseInt(slug);
+  const location = useLocation();
+  const tvId = tvIdProp ?? getIdFromDetailSlug(slug);
   const navigate = useNavigate();
   const [tv,             setTv]             = useState(null);
   const [loading,        setLoading]        = useState(true);
@@ -94,6 +96,14 @@ const TvDetails = ({ tvId: tvIdProp }) => {
       setViewingSeason(null); setPlayingSeason(null); setPlayingEpisode(null);
     };
   }, [load]);
+
+  useEffect(() => {
+    if (!tv?.id) return;
+    const canonicalPath = toDetailPath('tv', tv.id, tv.name);
+    if (location.pathname !== canonicalPath) {
+      navigate(canonicalPath, { replace: true });
+    }
+  }, [tv, location.pathname, navigate]);
 
   useEffect(() => {
     if (activeEpisodeRef.current && episodeListRef.current && viewingSeason === playingSeason) {

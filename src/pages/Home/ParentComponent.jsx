@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { BiUpArrowAlt, BiHomeAlt, BiMoviePlay, BiTv, BiSearch } from 'react-icons/bi';
 import Sidebar from './Sidebar';
+import { buildBrowsePath, getCategoryBySlug } from './urlFilters';
 
 function ParentComponent() {
   const location = useLocation();
@@ -24,9 +25,16 @@ function ParentComponent() {
     : location.pathname.startsWith('/tv/')     ? 'series'
     : 'home';
 
-  const selectedGenreId = searchParams.get('genre')
-    ? Number(searchParams.get('genre'))
-    : null;
+  const selectedGenreId = (() => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    if (pathParts[0] === 'movies' && pathParts[1]) {
+      return getCategoryBySlug('movie', pathParts[1])?.id ?? null;
+    }
+    if (pathParts[0] === 'series' && pathParts[1]) {
+      return getCategoryBySlug('tv', pathParts[1])?.id ?? null;
+    }
+    return searchParams.get('genre') ? Number(searchParams.get('genre')) : null;
+  })();
 
   const handleNavigation = (page) => {
     if (page === 'home')        navigate('/');
@@ -36,11 +44,8 @@ function ParentComponent() {
   };
 
   const handleGenreSelect = (genreId) => {
-    const basePath = activePage === 'series' ? '/series' : '/movies';
-    navigate({
-      pathname: basePath,
-      search: `?genre=${genreId}&sort=popularity.desc`,
-    });
+    const type = activePage === 'series' ? 'tv' : 'movie';
+    navigate(buildBrowsePath(type, genreId, 'popularity.desc'));
   };
 
   return (

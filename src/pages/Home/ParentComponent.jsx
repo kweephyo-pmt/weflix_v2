@@ -25,22 +25,9 @@ function ParentComponent() {
     const currentY = window.scrollY;
     setScrollPosition(currentY);
 
-    // On mobile search, hide bottom nav when scrolling down and show on scroll up.
-    if (activePage === 'search') {
-      const delta = currentY - lastScrollYRef.current;
-      if (currentY < 40) {
-        setShowMobileNav(true);
-      } else if (delta > 4) {
-        setShowMobileNav(false);
-      } else if (delta < -4) {
-        setShowMobileNav(true);
-      }
-    } else {
-      setShowMobileNav(true);
-    }
-
+    setShowMobileNav(true);
     lastScrollYRef.current = currentY;
-  }, [activePage]);
+  }, []);
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);

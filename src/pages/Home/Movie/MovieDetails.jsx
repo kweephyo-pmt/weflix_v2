@@ -15,10 +15,10 @@ const BACKDROP = "https://image.tmdb.org/t/p/original";
 const POSTER   = "https://image.tmdb.org/t/p/w500";
 
 const GENRE_COLORS = [
-  "bg-red-500/15 border-red-500/30 text-red-300",
-  "bg-violet-500/15 border-violet-500/30 text-violet-300",
-  "bg-sky-500/15 border-sky-500/30 text-sky-300",
-  "bg-amber-500/15 border-amber-500/30 text-amber-300",
+  "bg-white/[0.07] border-white/[0.14] text-gray-200",
+  "bg-white/[0.07] border-white/[0.14] text-gray-200",
+  "bg-white/[0.07] border-white/[0.14] text-gray-200",
+  "bg-white/[0.07] border-white/[0.14] text-gray-200",
 ];
 
 const GenreTag = ({ children, index }) => (
@@ -28,14 +28,14 @@ const GenreTag = ({ children, index }) => (
 );
 
 const MetaBadge = ({ icon: Icon, children }) => (
-  <span className="flex items-center gap-1.5 bg-white/[0.07] border border-white/[0.1] text-gray-300 text-xs font-semibold px-3 py-1.5 rounded-full">
+  <span className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.12] text-gray-200 text-xs font-semibold px-3 py-1.5 rounded-full">
     {Icon && <Icon className="text-gray-400 shrink-0 text-[12px]" />}
     {children}
   </span>
 );
 
 const MetaCard = ({ label, value, icon: Icon }) => (
-  <div className="flex flex-col gap-1.5 bg-white/[0.05] border border-white/[0.09] hover:bg-white/[0.09] hover:border-white/[0.16] rounded-2xl px-5 py-4 min-w-[120px] transition-colors duration-200">
+  <div className="flex flex-col gap-1.5 bg-white/[0.04] border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.16] rounded-2xl px-5 py-4 min-w-[120px] transition-colors duration-200">
     <p className="flex items-center gap-1.5 text-gray-500 text-[10px] uppercase tracking-[0.18em] font-bold">
       {Icon && <Icon className="text-[11px]" />}
       {label}
@@ -128,7 +128,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
     : overview;
 
   return (
-    <div className="min-h-screen bg-[#0a0c12] text-white">
+    <div className="min-h-screen bg-[#0b0b0f] text-white">
       <SEO
         title={`${movie.title}${year ? ` (${year})` : ''} — Watch Free on WeFlix`}
         description={
@@ -164,10 +164,10 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       />
 
       {/* ══════ BACK BUTTON ══════ */}
-      <div className="px-4 pt-5 md:px-12">
+      <div className="px-4 pt-5 md:px-12 max-w-7xl mx-auto w-full">
         <button
           onClick={handleBack}
-          className="group inline-flex items-center gap-2 bg-white/[0.07] hover:bg-white/[0.14] backdrop-blur-sm border border-white/[0.12] text-gray-300 hover:text-white text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200"
+          className="group inline-flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.12] backdrop-blur-sm border border-white/[0.12] text-gray-300 hover:text-white text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200"
         >
           <FaArrowLeft className="text-xs group-hover:-translate-x-1 transition-transform duration-200" />
           <span>Back</span>
@@ -175,19 +175,19 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       </div>
 
       {/* ══════ PLAYER ══════ */}
-      <div className="px-3 sm:px-5 md:px-10 lg:px-16 pt-5 pb-6 md:pb-10">
-        <div className="w-full max-w-[1100px] mx-auto">
+      <div className="px-3 sm:px-5 md:px-10 lg:px-16 pt-5 pb-8 md:pb-12">
+        <div className="w-full max-w-[1180px] mx-auto">
         {/* Player header */}
-        <div className="flex items-center gap-3 mb-4 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
+        <div className="flex items-center gap-3 mb-4 bg-white/[0.04] border border-white/[0.1] rounded-2xl px-4 py-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-red-600/25 border border-red-500/40 shrink-0">
             <FaFilm className="text-red-400 text-sm" />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-red-500/60 font-semibold mb-0.5">Now Playing</p>
-            <h2 className="text-sm md:text-base font-bold text-white truncate leading-tight">{movie.title}</h2>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-semibold mb-0.5">Now Playing</p>
+            <h2 className="text-sm md:text-base font-semibold text-white truncate leading-tight">{movie.title}</h2>
           </div>
           {rating && (
-            <div className="ml-auto flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/25 rounded-xl px-3 py-1.5 shrink-0 shadow-[0_0_20px_rgba(250,204,21,0.07)]">
+            <div className="ml-auto flex items-center gap-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-3 py-1.5 shrink-0">
               <FaStar className="text-yellow-400 text-[11px]" />
               <span className="text-yellow-300 font-bold text-sm">{rating}</span>
               <span className="text-gray-500 text-xs">/10</span>
@@ -196,7 +196,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
         </div>
 
         {/* Player frame */}
-        <div className="w-full rounded-2xl overflow-hidden ring-1 ring-white/[0.09] shadow-[0_24px_80px_rgba(0,0,0,0.85),0_0_50px_rgba(220,38,38,0.07)] bg-black relative">
+        <div className="w-full rounded-2xl overflow-hidden ring-1 ring-white/[0.12] shadow-[0_18px_60px_rgba(0,0,0,0.65)] bg-black relative">
           <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/[0.05] pointer-events-none z-10" />
           <div className="w-full aspect-video">
             <MemoizedVideoPlayer movieId={movieId} title={movie.title} />
@@ -236,22 +236,21 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-[#111827] to-[#0a0c12]" />
         )}
         {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0c12] via-[#0a0c12]/75 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0c12] via-[#0a0c12]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0f] via-[#0b0b0f]/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0f] via-[#0b0b0f]/50 to-transparent" />
         {/* Top fade from player section */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0a0c12] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0b0b0f] to-transparent" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-6 md:gap-10 px-4 sm:px-6 md:px-12 pt-10 pb-12 md:pb-16 max-w-6xl">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-6 md:gap-10 px-4 sm:px-6 md:px-12 pt-10 pb-12 md:pb-16 max-w-7xl mx-auto">
 
           {/* Poster */}
           {movie.poster_path && (
             <div className="shrink-0 hidden md:block self-end">
               <div className="relative">
-                <div className="absolute -inset-4 bg-red-600/20 blur-3xl rounded-3xl" />
                 <img
                   src={`${POSTER}${movie.poster_path}`}
                   alt={movie.title}
-                  className="relative w-44 lg:w-56 rounded-2xl shadow-[0_30px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/[0.18]"
+                  className="relative w-44 lg:w-56 rounded-2xl shadow-[0_30px_80px_rgba(0,0,0,0.75)] ring-1 ring-white/[0.18]"
                 />
               </div>
             </div>
@@ -268,7 +267,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
 
             {/* Title */}
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-black tracking-tight leading-[1.0] mb-1" style={{ textShadow: '0 2px 30px rgba(0,0,0,0.9)' }}>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.3rem] font-black tracking-tight leading-[1.02] mb-1" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.75)' }}>
                 {movie.title}
               </h1>
               {movie.original_title && movie.original_title !== movie.title && (
@@ -313,12 +312,13 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       {/* ══════ PRODUCTION META ══════ */}
       {(movie.production_companies?.length > 0 || movie.production_countries?.length > 0 || movie.status) && (
         <div className="px-3 sm:px-5 md:px-10 lg:px-16 pb-20">
+          <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-white/[0.07]" />
             <h3 className="text-[11px] uppercase tracking-[0.22em] text-gray-500 font-bold">Details</h3>
             <div className="flex-1 h-px bg-white/[0.07]" />
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
             {movie.production_companies?.length > 0 && (
               <MetaCard label="Studio" value={movie.production_companies.slice(0, 2).map(c => c.name).join(", ")} />
             )}
@@ -332,6 +332,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
             {movie.revenue > 0 && (
               <MetaCard label="Box Office" value={`$${(movie.revenue / 1e6).toFixed(0)}M`} />
             )}
+          </div>
           </div>
         </div>
       )}

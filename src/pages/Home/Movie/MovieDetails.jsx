@@ -55,6 +55,14 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
   const [retrying,     setRetrying]     = useState(false);
   const [showOverview, setShowOverview] = useState(false);
 
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+      return;
+    }
+    navigate(-1);
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -76,9 +84,9 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
     if (!movie?.id) return;
     const canonicalPath = toDetailPath('movie', movie.id, movie.title);
     if (location.pathname !== canonicalPath) {
-      navigate(canonicalPath, { replace: true });
+      navigate(canonicalPath, { replace: true, state: location.state });
     }
-  }, [movie, location.pathname, navigate]);
+  }, [movie, location.pathname, location.state, navigate]);
 
   const formatRuntime = (m) => {
     if (!m) return null;
@@ -158,7 +166,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       {/* ══════ BACK BUTTON ══════ */}
       <div className="px-4 pt-5 md:px-12">
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="group inline-flex items-center gap-2 bg-white/[0.07] hover:bg-white/[0.14] backdrop-blur-sm border border-white/[0.12] text-gray-300 hover:text-white text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200"
         >
           <FaArrowLeft className="text-xs group-hover:-translate-x-1 transition-transform duration-200" />

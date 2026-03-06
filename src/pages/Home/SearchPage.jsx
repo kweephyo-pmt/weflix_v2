@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { toDetailPath } from './urlUtils';
 import { FaSearch, FaTimes } from 'react-icons/fa';
@@ -62,11 +62,13 @@ const getNextPageParam = (lastPage, allPages) => {
 
 function SearchPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
   const sentinelRef = useRef(null);
 
-  const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const initialQuery = searchParams.get('q') || '';
+  const [query, setQuery] = useState(initialQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -76,6 +78,19 @@ function SearchPage() {
     const id = setTimeout(() => setDebouncedQuery(query), CONFIG.DEBOUNCE_DELAY);
     return () => clearTimeout(id);
   }, [query]);
+
+  // Keep search query in the URL so browser back restores the same results.
+  useEffect(() => {
+    const next = debouncedQuery.trim();
+    const current = searchParams.get('q') || '';
+    if (next === current) return;
+
+    const params = new URLSearchParams(searchParams);
+    if (next) params.set('q', next);
+    else params.delete('q');
+
+    setSearchParams(params, { replace: true });
+  }, [debouncedQuery, searchParams, setSearchParams]);
 
   const searchQuery = useInfiniteQuery({
     queryKey: ['search-multi', debouncedQuery],
@@ -262,7 +277,10 @@ function SearchPage() {
                 releaseDate={item.release_date || item.first_air_date}
                 onClick={() => {
                   const type = item.media_type === 'tv' ? 'tv' : 'movie';
-                  navigate(toDetailPath(type, item.id, item.title || item.name));
+                  const from = debouncedQuery.trim()
+                    ? `/search?q=${encodeURIComponent(debouncedQuery.trim())}`
+                    : '/search';
+                  navigate(toDetailPath(type, item.id, item.title || item.name), { state: { from } });
                 }}
               />
             ))}

@@ -57,6 +57,14 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const [playingEpisode, setPlayingEpisode] = useState(null);
   const [showOverview,   setShowOverview]   = useState(false);
 
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+      return;
+    }
+    navigate(-1);
+  };
+
   const activeEpisodeRef = useRef(null);
   const episodeListRef   = useRef(null);
 
@@ -101,9 +109,9 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     if (!tv?.id) return;
     const canonicalPath = toDetailPath('tv', tv.id, tv.name);
     if (location.pathname !== canonicalPath) {
-      navigate(canonicalPath, { replace: true });
+      navigate(canonicalPath, { replace: true, state: location.state });
     }
-  }, [tv, location.pathname, navigate]);
+  }, [tv, location.pathname, location.state, navigate]);
 
   useEffect(() => {
     if (activeEpisodeRef.current && episodeListRef.current && viewingSeason === playingSeason) {
@@ -183,7 +191,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
       {/* ── Back button ───────────────────────────── */}
       <div className="px-4 pt-5 md:px-12">
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="group inline-flex items-center gap-2 bg-white/[0.07] hover:bg-white/[0.14] backdrop-blur-sm border border-white/[0.12] text-gray-300 hover:text-white text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200"
         >
           <FaArrowLeft className="text-xs group-hover:-translate-x-1 transition-transform duration-200" />

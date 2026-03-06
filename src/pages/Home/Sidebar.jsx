@@ -97,7 +97,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
       {/* Categories section — only on movies / series */}
       {showCategories && (
         <>
-          <div className="mx-[18px] h-px bg-white/10 shrink-0" />
+          <div className="mx-[18px] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0" />
           <div className="flex-1 flex flex-col min-h-0 pt-4 pb-4">
             {/* Section label */}
             <div className="px-[18px] mb-2 shrink-0">
@@ -106,7 +106,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
               </span>
             </div>
             {/* Scrollable genre list */}
-            <div className="flex-1 overflow-y-auto hide-scrollbar px-[10px] flex flex-col gap-0.5">
+            <div className="flex-1 overflow-y-auto hide-scrollbar px-[10px] pt-1 flex flex-col gap-0.5">
               {allCategories.map((genre) => {
                 const isActiveGenre = selectedGenreId === genre.id;
                 return (

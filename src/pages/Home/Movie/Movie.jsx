@@ -81,7 +81,7 @@ function Movie() {
       />
       {/* Sticky context header */}
       <div className="sticky top-0 z-40 backdrop-blur-md bg-[#0b0f18]/80 border-b border-white/[0.06]">
-      <div className="px-4 sm:px-6 pt-4 pb-3">
+        <div className="px-4 sm:px-6 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
@@ -117,28 +117,27 @@ function Movie() {
           )}
         </div>
 
-      </div>
-      </div>
-
-      {/* Mobile genre chips — hidden on md+ (sidebar handles it there) */}
-      <div className="md:hidden overflow-x-auto hide-scrollbar px-4 pb-3">
-        <div className="flex gap-2 w-max">
-          {allCategories.map(cat => {
-            const isActive = cat.id === null ? genreId === null : genreId === cat.id;
-            return (
-              <button
-                key={cat.id ?? 'trending'}
-                onClick={() => handleGenreChip(cat.id)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  isActive
-                    ? 'bg-red-600 text-white'
-                    : 'bg-white/[0.07] text-gray-400 border border-white/10'
-                }`}
-              >
-                {cat.name}
-              </button>
-            );
-          })}
+        {/* Mobile genre chips */}
+        <div className="md:hidden overflow-x-auto hide-scrollbar mt-3 -mx-4 px-4 pb-1">
+          <div className="flex gap-2 w-max">
+            {allCategories.map(cat => {
+              const isActive = cat.id === null ? genreId === null : genreId === cat.id;
+              return (
+                <button
+                  key={cat.id ?? 'trending'}
+                  onClick={() => handleGenreChip(cat.id)}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white/[0.07] text-gray-400 border border-white/10'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         </div>
       </div>
 

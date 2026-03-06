@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { BiUpArrowAlt, BiHomeAlt, BiMoviePlay, BiTv, BiSearch } from 'react-icons/bi';
 import Sidebar from './Sidebar';
@@ -9,8 +9,29 @@ function ParentComponent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [showMobileNav, setShowMobileNav] = useState(true);
+  const lastScrollYRef = useRef(0);
 
-  const handleScroll = useCallback(() => setScrollPosition(window.scrollY), []);
+  const handleScroll = useCallback(() => {
+    const currentY = window.scrollY;
+    setScrollPosition(currentY);
+
+    // On mobile search, hide bottom nav when scrolling down and show on scroll up.
+    if (activePage === 'search') {
+      const delta = currentY - lastScrollYRef.current;
+      if (currentY < 40) {
+        setShowMobileNav(true);
+      } else if (delta > 4) {
+        setShowMobileNav(false);
+      } else if (delta < -4) {
+        setShowMobileNav(true);
+      }
+    } else {
+      setShowMobileNav(true);
+    }
+
+    lastScrollYRef.current = currentY;
+  }, [activePage]);
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -97,7 +118,7 @@ function ParentComponent() {
       </div>
 
       {/* Mobile bottom navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b14] border-t border-white/[0.08] shadow-[0_-10px_30px_rgba(0,0,0,0.55)] flex items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)]">
+      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b14] border-t border-white/[0.08] shadow-[0_-10px_30px_rgba(0,0,0,0.55)] flex items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)] transition-transform duration-200 ${showMobileNav ? 'translate-y-0' : 'translate-y-full'}`}>
         {[
           { id: 'home',   icon: BiHomeAlt,   label: 'Home'    },
           { id: 'movies', icon: BiMoviePlay, label: 'Movies'  },

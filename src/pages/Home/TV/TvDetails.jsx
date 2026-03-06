@@ -364,7 +364,24 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white">      <SEO
+    <div className="min-h-screen bg-[#0b0b0f] text-white">
+      {/* ── Full-page atmospheric backdrop ──────── */}
+      {tv.backdrop_path && (
+        <div aria-hidden="true" className="fixed inset-0 z-0 pointer-events-none select-none overflow-hidden">
+          <img
+            src={`${BACKDROP}${tv.backdrop_path}`}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover object-top"
+            style={{ filter: "brightness(0.28) saturate(1.15)", transform: "scale(1.05)" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0b0b0f]/30 via-[#0b0b0f]/65 to-[#0b0b0f]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0f]/50 to-transparent" />
+        </div>
+      )}
+
+      {/* ── Page content (above backdrop) ─────── */}
+      <div className="relative z-[1]">
+      <SEO
         title={`${tv.name}${year ? ` (${year})` : ''} — Watch Free on WeFlix`}
         description={
           tv.overview
@@ -825,6 +842,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
         </div>
       </footer>
 
+      </div>{/* end z-[1] content wrapper */}
     </div>
   );
 };

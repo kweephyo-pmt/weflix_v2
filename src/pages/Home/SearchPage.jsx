@@ -72,7 +72,11 @@ function SearchPage() {
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    // Only auto-focus on desktop to prevent the iOS Safari software keyboard from 
+    // automatically appearing and displacing the fixed bottom navbar.
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      inputRef.current?.focus();
+    }
   }, []);
 
   useEffect(() => {

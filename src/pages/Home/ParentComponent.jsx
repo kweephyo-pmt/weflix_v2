@@ -54,7 +54,7 @@ function ParentComponent() {
 
   return (
     <>
-      <div className="min-h-screen relative text-white">
+      <div className="min-h-screen relative text-white overflow-x-hidden w-full">
         <Sidebar
         activePage={activePage}
         onNavigate={handleNavigation}

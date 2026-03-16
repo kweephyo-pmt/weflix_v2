@@ -11,7 +11,7 @@ import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchSeriesDetails, fetchAllEpisodes, fetchRelatedSeries } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
-import { FaRedo, FaStar, FaArrowLeft, FaTv, FaStepBackward, FaStepForward } from "react-icons/fa";
+import { FaRedo, FaStar, FaArrowLeft, FaTv, FaStepBackward, FaStepForward, FaInfoCircle } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv, BiChevronLeft, BiChevronRight, BiSearch } from "react-icons/bi";
 import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
@@ -607,6 +607,26 @@ const TvDetails = ({ tvId: tvIdProp }) => {
         </div>
       </div>
 
+      {/* Info Banner (match Movies) */}
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mb-12">
+        <div className="flex items-start gap-4 bg-blue-900/10 border border-blue-500/20 rounded-2xl p-4 md:p-5">
+          <FaInfoCircle className="text-blue-400 text-xl shrink-0 mt-0.5" />
+          <p className="text-blue-200/70 text-sm leading-relaxed">
+            For the best ad-free streaming experience, we highly recommend using{" "}
+            <a
+              href="https://ublockorigin.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 font-semibold underline underline-offset-2 hover:text-blue-300 transition-colors"
+            >
+              uBlock Origin
+            </a>
+            . Enjoy uninterrupted playback.
+          </p>
+        </div>
+      </div>
+     
+          
       {/* ── EPISODES SELECTOR ── */}
       {allSeasons.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pb-16">

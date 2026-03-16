@@ -55,6 +55,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const [showOverview, setShowOverview] = useState(false);
   const [episodeQuery, setEpisodeQuery] = useState('');
   const [isDraggingEpisodes, setIsDraggingEpisodes] = useState(false);
+  const [isDraggingSeasons, setIsDraggingSeasons] = useState(false);
   const [isDraggingRelated, setIsDraggingRelated] = useState(false);
   const [related, setRelated] = useState([]);
   const numericTvId = Number(tvId);
@@ -71,6 +72,9 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const episodeListRef = useRef(null);
   const dragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
   const suppressClickRef = useRef(false);
+  const seasonListRef = useRef(null);
+  const seasonDragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
+  const suppressSeasonClickRef = useRef(false);
   const relatedListRef = useRef(null);
   const relatedDragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
   const suppressRelatedClickRef = useRef(false);
@@ -88,8 +92,10 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     setEpisodeQuery('');
     setRelated([]);
     setIsDraggingEpisodes(false);
+    setIsDraggingSeasons(false);
     setIsDraggingRelated(false);
     suppressClickRef.current = false;
+    suppressSeasonClickRef.current = false;
     suppressRelatedClickRef.current = false;
   }, [tvId]);
 
@@ -309,6 +315,46 @@ const TvDetails = ({ tvId: tvIdProp }) => {
       suppressRelatedClickRef.current = false;
     }, 0);
   }, []);
+
+  const onSeasonMouseDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    const el = seasonListRef.current;
+    if (!el) return;
+    seasonDragStateRef.current = {
+      active: true,
+      startX: e.pageX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setIsDraggingSeasons(true);
+  }, []);
+
+  const onSeasonMouseMove = useCallback((e) => {
+    const el = seasonListRef.current;
+    const drag = seasonDragStateRef.current;
+    if (!el || !drag.active) return;
+
+    const delta = e.pageX - drag.startX;
+    if (Math.abs(delta) > 4) drag.moved = true;
+    el.scrollLeft = drag.startScrollLeft - delta;
+  }, []);
+
+  const endSeasonDrag = useCallback(() => {
+    const drag = seasonDragStateRef.current;
+    if (!drag.active) return;
+    drag.active = false;
+    suppressSeasonClickRef.current = drag.moved;
+    setIsDraggingSeasons(false);
+
+    setTimeout(() => {
+      suppressSeasonClickRef.current = false;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', endSeasonDrag);
+    return () => window.removeEventListener('mouseup', endSeasonDrag);
+  }, [endSeasonDrag]);
 
   useEffect(() => {
     window.addEventListener('mouseup', endEpisodeDrag);
@@ -595,13 +641,24 @@ const TvDetails = ({ tvId: tvIdProp }) => {
             {/* Seasons List */}
             {allSeasons.length > 1 && (
               <div className="px-5 md:px-8 pt-6 pb-2">
-                <div className="flex gap-3 overflow-x-auto hide-scrollbar">
+                <div
+                  ref={seasonListRef}
+                  onMouseDown={onSeasonMouseDown}
+                  onMouseMove={onSeasonMouseMove}
+                  onMouseLeave={endSeasonDrag}
+                  className={`flex gap-3 overflow-x-auto hide-scrollbar ${isDraggingSeasons ? 'cursor-grabbing' : 'cursor-grab'}`}
+                >
                   {allSeasons.map(season => {
                     const isViewing = viewingSeason === season.season_number;
                     return (
                       <button
                         key={season.id ?? season.season_number}
-                        onClick={() => {
+                        onClick={(e) => {
+                          if (suppressSeasonClickRef.current) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                          }
                           const defaultEpisode =
                             season.episodes?.find((ep) => ep.episode_number === 1)?.episode_number
                             ?? season.episodes?.[0]?.episode_number

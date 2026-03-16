@@ -6,7 +6,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
 
     useEffect(() => { setActive(false); }, [tvId, season, episode]);
 
-    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?autoplay=true&muted=false`;
+    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&icons=vid&poster=true&player=jw&title=true&nextbutton=false`;
 
     return (
         <div className="relative w-full h-full">

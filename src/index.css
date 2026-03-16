@@ -25,9 +25,13 @@
 }
 
 
-body {
+html, body {
   background-color: black;
+}
+
+#root {
   overflow-x: hidden;
+  min-height: 100vh;
 }
 .fade-in {
     animation: fadeIn 0.2s ease-out forwards;

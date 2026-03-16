@@ -53,8 +53,9 @@ function ParentComponent() {
   };
 
   return (
-    <div className="min-h-screen relative text-white">
-      <Sidebar
+    <>
+      <div className="min-h-screen relative text-white">
+        <Sidebar
         activePage={activePage}
         onNavigate={handleNavigation}
         selectedGenreId={selectedGenreId}
@@ -98,6 +99,8 @@ function ParentComponent() {
         </footer>}
       </div>
 
+      </div>
+
       {/* Mobile bottom navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b14] border-t border-white/[0.08] shadow-[0_-10px_30px_rgba(0,0,0,0.55)] flex items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)]">
         {[
@@ -121,7 +124,7 @@ function ParentComponent() {
           );
         })}
       </nav>
-    </div>
+    </>
   );
 }
 

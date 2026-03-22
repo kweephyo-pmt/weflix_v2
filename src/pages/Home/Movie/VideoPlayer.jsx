@@ -8,7 +8,7 @@ const VideoPlayer = ({ movieId }) => {
 
     if (!movieId) return null;
 
-    const iframeSrc = `https://vidlink.pro/movie/${movieId}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false`;
+    const iframeSrc = `https://vidlink.pro/movie/${movieId}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw`;
 
     return (
         <div className="relative w-full h-full">

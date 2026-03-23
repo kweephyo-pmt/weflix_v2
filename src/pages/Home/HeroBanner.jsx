@@ -6,7 +6,8 @@ import { BiCalendar } from 'react-icons/bi';
 
 const API_KEY  = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const BACKDROP = 'https://image.tmdb.org/t/p/original';
+const BACKDROP = 'https://image.tmdb.org/t/p/w1280'; // Optimized down from 'original'
+const BACKDROP_THUMB = 'https://image.tmdb.org/t/p/w300';
 const INTERVAL = 7000;
 
 /* TMDB genre ID → label */
@@ -130,6 +131,7 @@ export default function HeroBanner() {
         <img
           src={`${BACKDROP}${item.backdrop_path}`}
           alt={title}
+          loading="lazy"
           className="w-full h-full object-cover object-center"
         />
         {/* Cinematic overlays */}
@@ -249,7 +251,7 @@ export default function HeroBanner() {
                   : 'ring-white/10 opacity-45 hover:opacity-75'
               }`}
             >
-              <img src={`${BACKDROP}${it.backdrop_path}`} alt="" className="w-full h-full object-cover" />
+              <img src={`${BACKDROP_THUMB}${it.backdrop_path}`} loading="lazy" alt="" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

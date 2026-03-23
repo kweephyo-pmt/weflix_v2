@@ -194,6 +194,10 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
             rating={item.vote_average}
             onClick={() => onSelect(item)}
             releaseDate={item.release_date || item.first_air_date}
+            mediaId={item.id}
+            mediaType={type}
+            posterPath={item.poster_path}
+            voteAverage={item.vote_average}
           />
         </motion.div>
       );

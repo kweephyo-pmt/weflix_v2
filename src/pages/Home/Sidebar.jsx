@@ -1,27 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   BiSearch,
   BiHomeAlt,
   BiMoviePlay,
   BiTv,
+  BiBookmark
 } from 'react-icons/bi';
-import { FaPlay } from 'react-icons/fa';
+import { FaPlay, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 import { GENRES, SPECIAL_CATEGORIES } from './tmdb';
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 const NAV_ITEMS = [
   { id: 'search', icon: BiSearch, action: 'navigate', label: 'Search' },
   { id: 'home', icon: BiHomeAlt, action: 'navigate', label: 'Home' },
   { id: 'movies', icon: BiMoviePlay, action: 'navigate', label: 'Movies' },
   { id: 'series', icon: BiTv, action: 'navigate', label: 'TV Shows' },
+  { id: 'watchlist', icon: BiBookmark, action: 'navigate', label: 'Watchlist' },
 ];
 
-function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
-  const activeId =
-    activePage === 'search' ? 'search'
-      : activePage === 'movies' ? 'movies'
-        : activePage === 'series' ? 'series'
-          : 'home';
+// Read cached auth flag from localStorage for instant render
+const getCachedUser = () => {
+  try { return JSON.parse(localStorage.getItem('weflix_user')) ?? null; } catch { return null; }
+};
+
+function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect, onOpenAuthModal }) {
+  const [user, setUser] = useState(getCachedUser);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const cached = { uid: currentUser.uid, displayName: currentUser.displayName, email: currentUser.email };
+        localStorage.setItem('weflix_user', JSON.stringify(cached));
+      } else {
+        localStorage.removeItem('weflix_user');
+      }
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const ACTIVE_MAP = { search: 'search', movies: 'movies', series: 'series', watchlist: 'watchlist', home: 'home' };
+  const activeId = ACTIVE_MAP[activePage] ?? 'home';
 
   const showCategories = activePage === 'movies' || activePage === 'series';
   const genreType = activePage === 'movies' ? 'movie' : 'tv';
@@ -137,6 +166,42 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
 
       {/* Bottom spacer */}
       {!showCategories && <div className="h-6 shrink-0" />}
+
+      {/* User profile / Logout */}
+      <div className="mt-auto pt-4 pb-6 px-[10px] shrink-0 border-t border-white/5 relative z-10 bg-gray-900/95">
+        {user ? (
+          <button
+            onClick={handleLogout}
+            title="Log Out"
+            className="
+              relative flex items-center gap-4 px-4 py-3.5 rounded-2xl
+              w-full whitespace-nowrap
+              border-2 border-transparent text-gray-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-colors duration-200 focus:outline-none group/user
+            "
+          >
+            <FaSignOutAlt className="text-[24px] shrink-0" />
+            <div className="flex flex-col text-left opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
+              <span className="text-white line-clamp-1 text-[13px] font-bold">{user.displayName || user.email?.split('@')[0]}</span>
+              <span className="text-red-400 text-[10px] font-bold uppercase tracking-wider">Log Out</span>
+            </div>
+          </button>
+        ) : (
+          <button
+            onClick={onOpenAuthModal}
+            title="Log In"
+            className="
+              relative flex items-center gap-4 px-4 py-3.5 rounded-2xl
+              w-full text-[14px] font-medium whitespace-nowrap
+              border-2 border-transparent text-gray-400 hover:text-white hover:bg-white/5 hover:border-transparent transition-colors duration-200 focus:outline-none
+            "
+          >
+            <FaUserCircle className="text-[24px] shrink-0" />
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 w-24 overflow-hidden">
+              Sign In
+            </span>
+          </button>
+        )}
+      </div>
     </aside>
   );
 }
@@ -146,6 +211,7 @@ Sidebar.propTypes = {
   onNavigate: PropTypes.func.isRequired,
   selectedGenreId: PropTypes.number,
   onGenreSelect: PropTypes.func,
+  onOpenAuthModal: PropTypes.func
 };
 
 export default React.memo(Sidebar);

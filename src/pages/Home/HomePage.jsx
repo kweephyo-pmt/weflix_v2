@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { toDetailPath } from './urlUtils';
 import HeroBanner from './HeroBanner';
 import TrendingRow from './TrendingRow';
+import ContinueWatchingRow from './ContinueWatchingRow';
 import SEO from './SEO';
 
 const SectionDivider = ({ label }) => (
@@ -19,9 +20,17 @@ export default function HomePage() {
 
   const handleSelect = (item, type) => {
     const mediaType = item.media_type ?? type;
-    navigate(toDetailPath(mediaType === 'tv' ? 'tv' : 'movie', item.id, item.title || item.name), {
-      state: { from: location.pathname + location.search },
-    });
+    const pathname = toDetailPath(mediaType === 'tv' ? 'tv' : 'movie', item.id, item.title || item.name);
+    
+    let search = '';
+    if (mediaType === 'tv' && item.season && item.episode) {
+      search = `?season=${item.season}&episode=${item.episode}`;
+    }
+
+    navigate(
+      { pathname, search },
+      { state: { from: location.pathname + location.search } }
+    );
   };
 
   const goMovies = () => navigate('/movies');
@@ -42,6 +51,8 @@ export default function HomePage() {
       <HeroBanner />
 
       <div className="pt-10 pb-8">
+        <ContinueWatchingRow onSelect={handleSelect} />
+
         {/* ── Movies ── */}
         <TrendingRow
           title="Trending Movies"

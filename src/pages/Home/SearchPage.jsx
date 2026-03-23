@@ -302,6 +302,10 @@ function SearchPage() {
                       : '/search';
                     navigate(toDetailPath(type, item.id, item.title || item.name), { state: { from } });
                   }}
+                  mediaId={item.id}
+                  mediaType={item.media_type === 'tv' ? 'tv' : 'movie'}
+                  posterPath={item.poster_path}
+                  voteAverage={item.vote_average}
                 />
               </motion.div>
             ))}

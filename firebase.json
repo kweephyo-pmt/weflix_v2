@@ -1,0 +1,17 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "WeFlix",
+        "supportEmail": "phyominthein.leo@gmail.com"
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast3",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

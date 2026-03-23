@@ -22,6 +22,10 @@ A modern movie and TV show streaming discovery app built with **React 18**, **Vi
 - **Search** — Search movies and TV shows with live results; genre chips let you jump directly to a category
 - **Infinite scroll** — Content grids load more as you scroll, with skeleton loaders and error handling
 - **Slug URLs** — Human-readable URLs like `/movie/550-fight-club` for better sharing
+- **User Authentication** — Secure login and signup powered by Firebase Auth
+- **Personal Watchlist** — Save your favorite movies and TV shows to a personal, cloud-synced watchlist
+- **Continue Watching** — Automatically tracks your viewing progress and displays a quick-resume row on the homepage seamlessly synced with Firestore
+- **Dynamic SEO** — Auto-generated layout meta tags, and page titles updating dynamically per context
 
 ---
 
@@ -34,6 +38,7 @@ A modern movie and TV show streaming discovery app built with **React 18**, **Vi
 | Routing | [React Router v6](https://reactrouter.com/) |
 | Animations | [Framer Motion](https://www.framer.com/motion/) |
 | Icons | [react-icons](https://react-icons.github.io/react-icons/) (Boxicons + FontAwesome) |
+| Backend & DB | [Firebase](https://firebase.google.com/) (Auth, Firestore DB, Hosting) |
 | Data | [TMDB API](https://www.themoviedb.org/documentation/api) |
 | Player | [vidlink.pro](https://vidlink.pro/) embedded iframe |
 
@@ -64,8 +69,18 @@ A modern movie and TV show streaming discovery app built with **React 18**, **Vi
 
    Create a `.env` file in the project root:
    ```env
+   # TMDB Configuration
    VITE_TMDB_API=your_tmdb_api_key_here
    VITE_BASE_URL=https://api.themoviedb.org/3
+
+   # Firebase Configuration
+   VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project_id.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
    ```
 
    > The app uses Vite's `import.meta.env` — variable names **must** start with `VITE_`.

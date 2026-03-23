@@ -80,20 +80,28 @@ function Series() {
       <div className="sticky top-0 z-40 backdrop-blur-md bg-[#0b0f18]/80 border-b border-white/[0.06]">
         <div className="px-4 sm:px-6 pt-4 pb-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
-              <BiTv className="text-red-400 text-lg" />
+          <div className="flex items-center gap-3.5">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.08] shadow-sm">
+              <BiTv className="text-red-500 text-xl" />
             </div>
-            <div>
-              <h1 className="text-white text-2xl font-black tracking-tight">TV Shows</h1>
+            <div className="flex flex-col">
+              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none">
+                TV Shows
+              </h1>
               {genre ? (
-                <p className="text-gray-500 text-sm">
-                  Browsing <span className="text-red-400 font-semibold">{genre.name}</span>
-                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-gray-400 text-[13px] font-medium leading-none">Browsing</span>
+                  <span className="px-2 py-0.5 rounded shadow-sm bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-bold tracking-wider uppercase leading-none">
+                    {genre.name}
+                  </span>
+                </div>
               ) : (
-                <p className="text-gray-500 text-sm">
-                  <span className="text-red-400 font-semibold">Trending</span> this week
-                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="px-2 py-0.5 rounded shadow-sm bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-bold tracking-wider uppercase leading-none">
+                    Trending
+                  </span>
+                  <span className="text-gray-400 text-[13px] font-medium leading-none">this week</span>
+                </div>
               )}
             </div>
           </div>

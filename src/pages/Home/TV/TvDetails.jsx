@@ -11,12 +11,17 @@ import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchSeriesDetails, fetchAllEpisodes, fetchRelatedSeries } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
-import { FaRedo, FaStar, FaArrowLeft, FaTv, FaStepBackward, FaStepForward, FaInfoCircle } from "react-icons/fa";
+import { saveToContinueWatching } from "../../../utils/continueWatching";
+import { FaRedo, FaStar, FaArrowLeft, FaTv, FaStepBackward, FaStepForward, FaInfoCircle, FaBookmark } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv, BiChevronLeft, BiChevronRight, BiSearch } from "react-icons/bi";
 import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
+import AuthModal from "../../../components/AuthModal";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../firebase";
+import { useWatchlist } from "../../../context/WatchlistContext";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
 
@@ -58,6 +63,9 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const [isDraggingSeasons, setIsDraggingSeasons] = useState(false);
   const [isDraggingRelated, setIsDraggingRelated] = useState(false);
   const [related, setRelated] = useState([]);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, watchlistIds, toggleWatchlist: ctxToggleWatchlist } = useWatchlist();
+  const inWatchlist = tv?.id ? watchlistIds.has(String(tv.id)) : false;
   const numericTvId = Number(tvId);
 
   const handleBack = () => {
@@ -94,6 +102,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     setIsDraggingEpisodes(false);
     setIsDraggingSeasons(false);
     setIsDraggingRelated(false);
+    setIsAuthModalOpen(false);
     suppressClickRef.current = false;
     suppressSeasonClickRef.current = false;
     suppressRelatedClickRef.current = false;
@@ -165,6 +174,21 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     }
   }, [tv, location.pathname, location.search, location.state, navigate]);
 
+  const toggleWatchlist = () => {
+    if (!tv?.id) return;
+    ctxToggleWatchlist(
+      {
+        mediaId: tv.id,
+        type: 'tv',
+        title: tv.name,
+        poster_path: tv.poster_path,
+        vote_average: tv.vote_average,
+        release_date: tv.first_air_date,
+      },
+      () => setIsAuthModalOpen(true)
+    );
+  };
+
   useEffect(() => {
     if (!allSeasons.length) return;
     if (loading) return;
@@ -207,6 +231,21 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     nextParams.set('episode', String(playingEpisode));
     setSearchParams(nextParams, { replace: true });
   }, [allSeasons.length, playingSeason, playingEpisode, location.search, setSearchParams, loading, tv, numericTvId]);
+
+  // Save to "Continue Watching" tracking
+  useEffect(() => {
+    if (!tv || playingSeason === null || playingEpisode === null || !user?.uid) return;
+    saveToContinueWatching(user.uid, {
+      id: tv.id,
+      mediaType: 'tv',
+      title: `${tv.name} - S${playingSeason}E${playingEpisode}`,
+      poster_path: tv.poster_path,
+      vote_average: tv.vote_average,
+      release_date: tv.first_air_date,
+      season: playingSeason,
+      episode: playingEpisode,
+    });
+  }, [tv, playingSeason, playingEpisode, user]);
 
   useEffect(() => {
     if (activeEpisodeRef.current && episodeListRef.current && viewingSeason === playingSeason) {
@@ -511,6 +550,21 @@ const TvDetails = ({ tvId: tvIdProp }) => {
                </div>
             )}
 
+            {/* Actions */}
+            <div className="flex flex-wrap gap-4 mb-6">
+               <button
+                 onClick={toggleWatchlist}
+                 className={`flex items-center gap-2 backdrop-blur-md text-white font-bold px-6 py-3 rounded-xl transition-all active:scale-[0.98] ${
+                   inWatchlist 
+                     ? 'bg-red-600/20 hover:bg-red-600/30 border border-red-500/50' 
+                     : 'bg-white/10 hover:bg-white/20 border border-white/10'
+                 }`}
+               >
+                 <FaBookmark className={inWatchlist ? "text-red-400" : ""} /> 
+                 {inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+               </button>
+            </div>
+
             {overview && (
               <div className="relative">
                 <p className="text-gray-300/90 leading-relaxed md:text-lg drop-shadow-md max-w-2xl">
@@ -532,10 +586,12 @@ const TvDetails = ({ tvId: tvIdProp }) => {
 
       {/* ── PLAYER SECTION ── */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 -mt-4 md:-mt-10 mb-12">
-        <div className="bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl mb-6 ring-1 ring-white/5">
-
+        <div className="relative mb-6">
+          {/* Subtle Video Player Glow Backdrop */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-red-600/30 to-blue-600/30 blur-2xl opacity-50 z-0 rounded-2xl md:rounded-[2rem]"></div>
           
-          <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
+          <div className="relative z-10 bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl ring-1 ring-white/5">
+            <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
             {playingSeason !== null && playingEpisode !== null ? (
               <MemoizedVideoPlayer
                 tvId={tvId}
@@ -580,6 +636,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
 
@@ -780,10 +837,10 @@ const TvDetails = ({ tvId: tvIdProp }) => {
               onMouseDown={onRelatedMouseDown}
               onMouseMove={onRelatedMouseMove}
               onMouseLeave={endRelatedDrag}
-              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none snap-x snap-mandatory ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
               {related.map((item) => (
-                <div key={item.id} className="shrink-0 transition-transform duration-300 hover:-translate-y-2">
+                <div key={item.id} className="snap-start shrink-0 transition-transform duration-300 hover:-translate-y-2">
                   <ContentCard
                     title={item.name || item.title}
                     poster={item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : '/placeholder.svg'}
@@ -821,6 +878,9 @@ const TvDetails = ({ tvId: tvIdProp }) => {
           </div>
         </div>
       </footer>
+      
+      {/* Auth Modal Form */}
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 };

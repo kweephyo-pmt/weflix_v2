@@ -1,20 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { BiUpArrowAlt, BiHomeAlt, BiMoviePlay, BiTv, BiSearch } from 'react-icons/bi';
+import { BiUpArrowAlt, BiHomeAlt, BiMoviePlay, BiTv, BiSearch, BiBookmark } from 'react-icons/bi';
+import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 import Sidebar from './Sidebar';
 import { buildBrowsePath, getCategoryBySlug } from './urlFilters';
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../../firebase";
+import AuthModal from "../../components/AuthModal";
 
 function ParentComponent() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [user, setUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const activePage =
     location.pathname === '/'                  ? 'home'
     : location.pathname.startsWith('/movies')  ? 'movies'
     : location.pathname.startsWith('/series')  ? 'series'
     : location.pathname.startsWith('/search')  ? 'search'
+    : location.pathname.startsWith('/watchlist') ? 'watchlist'
     : location.pathname.startsWith('/movie/')  ? 'movies'
     : location.pathname.startsWith('/tv/')     ? 'series'
     : 'home';
@@ -59,6 +81,7 @@ function ParentComponent() {
         onNavigate={handleNavigation}
         selectedGenreId={selectedGenreId}
         onGenreSelect={handleGenreSelect}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {scrollPosition > 300 && (
@@ -105,13 +128,14 @@ function ParentComponent() {
           { id: 'movies', icon: BiMoviePlay, label: 'Movies'  },
           { id: 'series', icon: BiTv,        label: 'TV'      },
           { id: 'search', icon: BiSearch,    label: 'Search'  },
+          { id: 'watchlist', icon: BiBookmark, label: 'Watchlist' },
         ].map(({ id, icon: Icon, label }) => {
           const isActive = activePage === id;
           return (
             <button
               key={id}
               onClick={() => handleNavigation(id)}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
                 isActive ? 'text-red-400' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
@@ -120,7 +144,28 @@ function ParentComponent() {
             </button>
           );
         })}
+        {/* Mobile Profile/Auth Button */}
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors text-red-500/80 hover:text-red-400"
+          >
+            <FaSignOutAlt className="text-2xl" />
+            <span className="text-[10px] font-medium font-bold uppercase tracking-wider">Log Out</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors text-gray-500 hover:text-gray-300"
+          >
+            <FaUserCircle className="text-2xl" />
+            <span className="text-[10px] font-medium">Log In</span>
+          </button>
+        )}
       </nav>
+
+      {/* Auth Modal Form */}
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 }

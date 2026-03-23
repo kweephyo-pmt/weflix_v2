@@ -283,6 +283,10 @@ export default function TrendingRow({
                   if (suppressClickRef.current) return;
                   onSelect(item, mediaType);
                 }}
+                mediaId={item.id}
+                mediaType={mediaType === 'tv' ? 'tv' : 'movie'}
+                posterPath={item.poster_path}
+                voteAverage={item.vote_average}
               />
             </div>
           );

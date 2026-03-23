@@ -3,12 +3,15 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { fetchMovieDetails, fetchRelatedMovies } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
-import { FaRedo, FaStar, FaArrowLeft, FaFilm, FaInfoCircle } from "react-icons/fa";
+import { saveToContinueWatching } from "../../../utils/continueWatching";
+import { FaRedo, FaStar, FaArrowLeft, FaInfoCircle, FaBookmark } from "react-icons/fa";
 import { BiCalendar, BiTime, BiGlobe } from "react-icons/bi";
 import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
+import AuthModal from "../../../components/AuthModal";
+import { useWatchlist } from "../../../context/WatchlistContext";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
 
@@ -27,6 +30,9 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
   const [showOverview, setShowOverview] = useState(false);
   const [related,      setRelated]      = useState([]);
   const [isDraggingRelated, setIsDraggingRelated] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, watchlistIds, toggleWatchlist: ctxToggleWatchlist } = useWatchlist();
+  const inWatchlist = movie?.id ? watchlistIds.has(String(movie.id)) : false;
 
   const relatedListRef = useRef(null);
   const relatedDragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
@@ -40,6 +46,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
     setRelated([]);
     setShowOverview(false);
     setIsDraggingRelated(false);
+    setIsAuthModalOpen(false);
     suppressRelatedClickRef.current = false;
   }, [movieId]);
 
@@ -76,6 +83,19 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [movieId]);
 
+  // Save to "Continue Watching" tracking
+  useEffect(() => {
+    if (!movie || !user?.uid) return;
+    saveToContinueWatching(user.uid, {
+      id: movie.id,
+      mediaType: 'movie',
+      title: movie.title,
+      poster_path: movie.poster_path,
+      vote_average: movie.vote_average,
+      release_date: movie.release_date,
+    });
+  }, [movie, user]);
+
   useEffect(() => {
     if (!movie?.id) return;
     const isLegacyRoute = location.pathname.startsWith('/movie/');
@@ -85,6 +105,21 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       navigate(canonicalPath, { replace: true, state: location.state });
     }
   }, [movie, location.pathname, location.state, navigate]);
+
+  const toggleWatchlist = () => {
+    if (!movie?.id) return;
+    ctxToggleWatchlist(
+      {
+        mediaId: movie.id,
+        type: 'movie',
+        title: movie.title,
+        poster_path: movie.poster_path,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date,
+      },
+      () => setIsAuthModalOpen(true)
+    );
+  };
 
   const handleRelatedSelect = useCallback((item) => {
     navigate(toDetailPath('movie', item.id, item.title || item.name), {
@@ -278,6 +313,21 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
                </div>
             )}
 
+            {/* Actions */}
+            <div className="flex flex-wrap gap-4 mb-6">
+               <button
+                 onClick={toggleWatchlist}
+                 className={`flex items-center gap-2 backdrop-blur-md text-white font-bold px-6 py-3 rounded-xl transition-all active:scale-[0.98] ${
+                   inWatchlist 
+                     ? 'bg-red-600/20 hover:bg-red-600/30 border border-red-500/50' 
+                     : 'bg-white/10 hover:bg-white/20 border border-white/10'
+                 }`}
+               >
+                 <FaBookmark className={inWatchlist ? "text-red-400" : ""} /> 
+                 {inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+               </button>
+            </div>
+
             {overview && (
               <div className="relative">
                 <p className="text-gray-300/90 leading-relaxed md:text-lg drop-shadow-md max-w-2xl">
@@ -385,6 +435,9 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           </div>
         </div>
       </footer>
+      
+      {/* Auth Modal Form */}
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 };

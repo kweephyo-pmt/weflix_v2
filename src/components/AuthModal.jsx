@@ -107,6 +107,10 @@ export default function AuthModal({ isOpen, onClose }) {
         await updateProfile(userCredential.user, { displayName: name });
         // Save to Firestore with the displayName we just set
         await saveUserToFirestore({ ...userCredential.user, displayName: name });
+        // Send verification email
+        import('firebase/auth').then(({ sendEmailVerification }) => {
+          sendEmailVerification(userCredential.user);
+        });
       }
       onClose();
     } catch (err) {

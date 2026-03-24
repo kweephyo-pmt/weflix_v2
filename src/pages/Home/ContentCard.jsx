@@ -74,6 +74,7 @@ const ContentCard = memo(({
   const [trailerError, setTrailerError] = useState(false);
   const [popoutOrigin, setPopoutOrigin] = useState('center');
   const [isMuted, setIsMuted] = useState(true);
+  const [iframeReady, setIframeReady] = useState(false);
   
   const hoverTimerRef = useRef(null);
   const iframeRef = useRef(null);
@@ -114,6 +115,7 @@ const ContentCard = memo(({
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
     setShowTrailer(false);
     setIsMuted(true);
+    setIframeReady(false);
   }, []);
 
   useEffect(() => {
@@ -255,7 +257,28 @@ const ContentCard = memo(({
                 src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}&playsinline=1&enablejsapi=1`}
                 className="w-full h-full scale-[1.35] pointer-events-none"
                 allow="autoplay; encrypted-media"
+                onLoad={() => setTimeout(() => setIframeReady(true), 800)}
               />
+              {/* Poster cover — hides YouTube loader/logo while buffering */}
+              <div
+                className="absolute inset-0 transition-opacity duration-500 pointer-events-none"
+                style={{ opacity: iframeReady ? 0 : 1 }}
+              >
+                {poster && (
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundImage: `url(${poster})`,
+                      backgroundSize: '100% 100%',
+                      backgroundPosition: 'center center',
+                      filter: 'blur(12px)',
+                      transform: 'scale(1.15)',
+                    }}
+                  />
+                )}
+                {/* Dark scrim so it doesn't look too bright */}
+                <div className="absolute inset-0 bg-black/50" />
+              </div>
               <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#181818] to-transparent pointer-events-none" />
               {/* Mute / Unmute button */}
               <button

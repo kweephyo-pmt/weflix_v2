@@ -12,7 +12,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
 
     if (!tvId) return null;
 
-    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw`;
+    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw&autoplay=false`;
     
     return (
         <div className="relative w-full h-full bg-black">

@@ -261,7 +261,7 @@ export default function TrendingRow({
               {/* Rank number */}
               {showRank && (
                 <span
-                  className="absolute top-0 left-0 z-10 font-black select-none pointer-events-none"
+                  className="absolute top-0 left-0 z-20 font-black select-none pointer-events-none"
                   style={{
                     fontSize: 72,
                     lineHeight: 1,

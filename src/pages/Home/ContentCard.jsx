@@ -72,10 +72,21 @@ const ContentCard = memo(({
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
   const [trailerError, setTrailerError] = useState(false);
+  const [popoutOrigin, setPopoutOrigin] = useState('center');
   const hoverTimerRef = useRef(null);
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = useCallback((e) => {
     if (!mediaId || !mediaType) return;
+    
+    if (e?.currentTarget) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const vw = window.innerWidth;
+      // Cards too close to the left/right edges must transform away from the edge
+      if (rect.left < vw * 0.15) setPopoutOrigin('left');
+      else if (rect.right > vw * 0.85) setPopoutOrigin('right');
+      else setPopoutOrigin('center');
+    }
+
     hoverTimerRef.current = setTimeout(() => {
       setShowTrailer(true);
     }, 800); // 800ms hover creates an intentional feel
@@ -108,9 +119,7 @@ const ContentCard = memo(({
       whileHover={{ scale: 1.05, y: -4 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`group relative w-full cursor-pointer rounded-xl overflow-hidden
-        ring-1 ring-white/5 hover:ring-white/20 hover:shadow-2xl hover:shadow-black/60
-        transition-shadow duration-200 ${className}`}
+      className={`group relative w-full cursor-pointer transition-shadow duration-200 ${showTrailer ? 'z-50' : 'z-10'} ${className}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -119,93 +128,149 @@ const ContentCard = memo(({
       onMouseLeave={handleMouseLeave}
       aria-label={`${title}${year ? ` (${year})` : ''}`}
     >
-      {/* Poster */}
-      <div className="relative w-full aspect-[2/3] bg-[#111827]">
-        {/* Hover Trailer Iframe */}
-        {showTrailer && trailerKey && (
-          <div className="absolute inset-0 z-10 bg-black overflow-hidden pointer-events-none animate-in fade-in duration-500">
-            {/* 3x scale trick to crop letterboxes & fit vertically */}
-            <iframe
-              title="Trailer"
-              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}&playsinline=1`}
-              className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2"
-              allow="autoplay; encrypted-media"
-            />
+      {/* ── ACTUAL CARD WITH CLIPPING ── */}
+      <div className="w-full h-full rounded-xl overflow-hidden ring-1 ring-white/5 group-hover:ring-white/20 group-hover:shadow-2xl group-hover:shadow-black/60 relative flex flex-col z-20 bg-[#0d1117]">
+        {/* Poster */}
+        <div className="relative w-full aspect-[2/3] bg-[#111827]">
+          {/* Skeleton */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-b from-white/5 to-white/[0.02]" />
+          )}
+
+          <img
+            src={src}
+            alt={title}
+            loading="lazy"
+            className={`w-full h-full object-cover transition-all duration-700 ease-out ${
+              imageLoaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-105'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => { setImageError(true); setImageLoaded(true); }}
+          />
+
+          {/* Always-visible bottom gradient */}
+          <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+
+          {/* Rating badge — top right */}
+          {ratingNum && (
+            <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm
+              text-[11px] font-bold px-1.5 py-0.5 rounded-md">
+              <FaStar className={`text-[9px] ${ratingColor}`} />
+              <span className={ratingColor}>{ratingNum}%</span>
+            </div>
+          )}
+
+          {/* Media-type badge — top left */}
+          {mediaType && (
+            <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-sm pointer-events-none">
+              {mediaType === 'tv' ? 'SERIES' : 'MOVIE'}
+            </div>
+          )}
+
+          {/* Hover overlay — Play + Watchlist */}
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+            {/* Play */}
+            <div className="w-12 h-12 rounded-full bg-red-600 shadow-lg shadow-red-700/50 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-200">
+              <FaPlay className="text-white text-sm ml-0.5" />
+            </div>
+
+            {/* Watchlist toggle */}
+            {showWatchlistBtn && (
+              <button
+                onClick={handleWatchlist}
+                title={inWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                className={`w-12 h-12 rounded-full flex items-center justify-center
+                  transform scale-75 group-hover:scale-100 transition-all duration-200
+                  shadow-lg
+                  ${inWatchlist
+                    ? (isWatchlistPage ? 'bg-black/60 hover:bg-red-600/90 border border-white/20 hover:border-red-500' : 'bg-red-600 shadow-red-700/50')
+                    : 'bg-white/25 backdrop-blur-sm border border-white/30 hover:bg-white/35'
+                  }`}
+              >
+                {inWatchlist
+                  ? (isWatchlistPage ? <FaTrash className="text-white text-sm" /> : <FaCheck className="text-white text-sm" />)
+                  : <FaPlus className="text-white text-sm" />
+                }
+              </button>
+            )}
           </div>
-        )}
-        {/* Skeleton */}
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 animate-pulse bg-gradient-to-b from-white/5 to-white/[0.02]" />
-        )}
+        </div>
 
-        <img
-          src={src}
-          alt={title}
-          loading="lazy"
-          className={`w-full h-full object-cover transition-all duration-700 ease-out ${
-            imageLoaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-105'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => { setImageError(true); setImageLoaded(true); }}
-        />
-
-        {/* Always-visible bottom gradient */}
-        <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
-
-        {/* Rating badge — top right */}
-        {ratingNum && (
-          <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm
-            text-[11px] font-bold px-1.5 py-0.5 rounded-md">
-            <FaStar className={`text-[9px] ${ratingColor}`} />
-            <span className={ratingColor}>{ratingNum}%</span>
-          </div>
-        )}
-
-        {/* Media-type badge — top left */}
-        {mediaType && (
-          <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-sm pointer-events-none">
-            {mediaType === 'tv' ? 'SERIES' : 'MOVIE'}
-          </div>
-        )}
-
-        {/* Hover overlay — Play + Watchlist */}
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
-          {/* Play */}
-          <div className="w-12 h-12 rounded-full bg-red-600 shadow-lg shadow-red-700/50 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-200">
-            <FaPlay className="text-white text-sm ml-0.5" />
-          </div>
-
-          {/* Watchlist toggle */}
-          {showWatchlistBtn && (
-            <button
-              onClick={handleWatchlist}
-              title={inWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
-              className={`w-12 h-12 rounded-full flex items-center justify-center
-                transform scale-75 group-hover:scale-100 transition-all duration-200
-                shadow-lg
-                ${inWatchlist
-                  ? (isWatchlistPage ? 'bg-black/60 hover:bg-red-600/90 border border-white/20 hover:border-red-500' : 'bg-red-600 shadow-red-700/50')
-                  : 'bg-white/25 backdrop-blur-sm border border-white/30 hover:bg-white/35'
-                }`}
-            >
-              {inWatchlist
-                ? (isWatchlistPage ? <FaTrash className="text-white text-sm" /> : <FaCheck className="text-white text-sm" />)
-                : <FaPlus className="text-white text-sm" />
-              }
-            </button>
+        {/* Info below poster */}
+        <div className="px-2.5 pt-2 pb-2.5 shrink-0 bg-[#0d1117] relative z-20">
+          <p className="text-white text-[13px] font-semibold leading-tight line-clamp-1">{title}</p>
+          {(year || mediaType) && (
+            <p className="text-gray-500 text-[11px] mt-0.5">
+              {year}{year && mediaType && ' • '}{mediaType === 'tv' ? 'TV Show' : mediaType === 'movie' ? 'Movie' : ''}
+            </p>
           )}
         </div>
       </div>
 
-      {/* Info below poster */}
-      <div className="px-2.5 pt-2 pb-2.5 bg-[#0d1117]">
-        <p className="text-white text-[13px] font-semibold leading-tight line-clamp-1">{title}</p>
-        {(year || mediaType) && (
-          <p className="text-gray-500 text-[11px] mt-0.5">
-            {year}{year && mediaType && ' • '}{mediaType === 'tv' ? 'TV Show' : mediaType === 'movie' ? 'Movie' : ''}
-          </p>
-        )}
-      </div>
+      {/* ── POPOUT TRAILER OVERLAY (NETFLIX WEB STYLE) ── */}
+      {showTrailer && trailerKey && (
+        <div 
+          className="absolute z-50 pointer-events-none"
+          style={{ 
+            top: '50%',
+            width: '220%',
+            ...(popoutOrigin === 'left' 
+              ? { left: '0%', transform: 'translate(0%, -50%)' } 
+              : popoutOrigin === 'right' 
+                ? { right: '0%', transform: 'translate(0%, -50%)' } 
+                : { left: '50%', transform: 'translate(-50%, -50%)' }
+            )
+          }}
+        >
+          <div 
+            className={`w-full bg-[#181818] rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.95)] ring-1 ring-white/10 animate-in fade-in fill-mode-both zoom-in-75 duration-300 pointer-events-auto flex flex-col ${
+              popoutOrigin === 'left' ? 'origin-left' : popoutOrigin === 'right' ? 'origin-right' : 'origin-center'
+            }`}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* 16:9 Video Top */}
+            <div className="relative w-full aspect-video bg-black cursor-pointer overflow-hidden" onClick={onClick}>
+              <iframe
+                title="Trailer"
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=0&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}&playsinline=1`}
+                className="w-full h-full scale-[1.35] pointer-events-none"
+                allow="autoplay; encrypted-media"
+              />
+              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#181818] to-transparent pointer-events-none" />
+            </div>
+
+            {/* Info Panel Bottom */}
+            <div className="px-4 py-4 shrink-0 flex flex-col gap-2.5 relative z-10 -mt-[1px] bg-[#181818]">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); onClick(); }}
+                  className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
+                >
+                  <FaPlay className="text-black text-[10px] ml-0.5" />
+                </button>
+                {showWatchlistBtn && (
+                  <button 
+                    onClick={handleWatchlist}
+                    className="w-8 h-8 rounded-full bg-[#2a2a2a] border border-white/30 flex items-center justify-center hover:border-white transition-colors"
+                  >
+                    {inWatchlist 
+                      ? (isWatchlistPage ? <FaTrash className="text-white text-[10px]" /> : <FaCheck className="text-white text-[10px]" />) 
+                      : <FaPlus className="text-white text-[10px]" />
+                    }
+                  </button>
+                )}
+              </div>
+              
+              <h4 className="text-white text-sm font-bold leading-tight">{title}</h4>
+              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold">
+                {ratingNum && <span className={ratingColor}>{ratingNum}% Match</span>}
+                {year && <span className="text-gray-400">{year}</span>}
+                {mediaType && <span className="text-gray-400 border border-gray-600 px-1 rounded-sm uppercase text-[9px]">{mediaType}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 });

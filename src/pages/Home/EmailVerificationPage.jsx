@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { applyActionCode } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase';
 import { FaSpinner, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { BiMoviePlay } from 'react-icons/bi';
 import SEO from './SEO';
@@ -26,7 +27,17 @@ export default function EmailVerificationPage() {
 
     // Verify the email code
     applyActionCode(auth, oobCode)
-      .then(() => {
+      .then(async () => {
+        // If the user clicked the link in the same browser, they are still signed in!
+        // We reload their user profile to instantly pull the new emailVerified=true status
+        if (auth.currentUser) {
+          await auth.currentUser.reload();
+          
+          // Also instantly sync their verified status to Firestore
+          const ref = doc(db, 'users', auth.currentUser.uid);
+          await setDoc(ref, { emailVerified: true }, { merge: true });
+        }
+        
         setSuccess(true);
         setLoading(false);
       })

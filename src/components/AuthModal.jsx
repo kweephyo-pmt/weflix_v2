@@ -43,6 +43,7 @@ const saveUserToFirestore = async (user) => {
     displayName: user.displayName || null,
     email: user.email,
     photoURL: user.photoURL || null,
+    emailVerified: user.emailVerified || false,
     lastLoginAt: serverTimestamp(),
   }, { merge: true });
 };
@@ -110,6 +111,9 @@ export default function AuthModal({ isOpen, onClose }) {
           setPendingGoogleCred(null);
           // Refresh user to get updated profile after link
           await saveUserToFirestore({ ...result.user, displayName: result.user.displayName });
+        } else {
+          // Update Firestore on standard login to reflect verified status and last login
+          await saveUserToFirestore(result.user);
         }
       } else {
         // Register new user
@@ -118,11 +122,11 @@ export default function AuthModal({ isOpen, onClose }) {
         // Save to Firestore with the displayName we just set
         await saveUserToFirestore({ ...userCredential.user, displayName: name });
         
-        // Send verification email and immediately sign them out to block unverified access
+        // Send verification email
         const { sendEmailVerification } = await import('firebase/auth');
         await sendEmailVerification(userCredential.user);
-        await auth.signOut();
         
+        // We do NOT sign out here so they remain logged in locally.
         setVerificationSent(true);
         return; // Stop early so we show the success screen
       }

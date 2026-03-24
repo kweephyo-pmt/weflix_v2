@@ -394,10 +394,10 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
               onMouseDown={onRelatedMouseDown}
               onMouseMove={onRelatedMouseMove}
               onMouseLeave={endRelatedDrag}
-              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none snap-x snap-mandatory ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
               {related.map((item) => (
-                <div key={item.id} className="snap-start shrink-0 transition-transform duration-300 hover:-translate-y-2">
+                <div key={item.id} className="shrink-0 transition-transform duration-300 hover:-translate-y-2">
                   <ContentCard
                     title={item.title || item.name}
                     poster={item.poster_path ? `${POSTER}${item.poster_path}` : '/placeholder.svg'}

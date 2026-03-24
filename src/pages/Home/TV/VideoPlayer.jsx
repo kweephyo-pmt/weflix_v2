@@ -26,7 +26,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
                     allowFullScreen
                     webkitallowfullscreen="true"
                     mozallowfullscreen="true"
-                    referrerPolicy="no-referrer"
+                    referrerPolicy="origin"
                 />
             )}
         </div>

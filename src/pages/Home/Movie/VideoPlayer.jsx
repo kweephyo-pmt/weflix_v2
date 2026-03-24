@@ -25,7 +25,7 @@ const VideoPlayer = ({ movieId }) => {
                     webkitallowfullscreen="true"
                     mozallowfullscreen="true"
                     title="Movie Stream"
-                    referrerPolicy="no-referrer"
+                    referrerPolicy="origin"
                     className="absolute inset-0 w-full h-full border-0"
                     style={{ userSelect: 'none' }}
                 />

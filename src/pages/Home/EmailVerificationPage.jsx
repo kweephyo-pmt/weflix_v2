@@ -25,26 +25,33 @@ export default function EmailVerificationPage() {
       return;
     }
 
-    // Verify the email code
-    applyActionCode(auth, oobCode)
-      .then(async () => {
-        // If the user clicked the link in the same browser, they are still signed in!
-        // We reload their user profile to instantly pull the new emailVerified=true status
+    const processVerification = async () => {
+      try {
+        // 1. Actually verify the email token with Firebase
+        await applyActionCode(auth, oobCode);
+        
+        // 2. VERY IMPORTANT: Wait for Firebase to finish reading the local browser's session storage.
+        // If they just opened a new tab from Gmail, auth.currentUser might be null for a split second!
+        await auth.authStateReady();
+        
+        // 3. If they opened the link in the SAME browser/device they registered with, 
+        // silently refresh their profile and log them in completely.
         if (auth.currentUser) {
           await auth.currentUser.reload();
           
-          // Also instantly sync their verified status to Firestore
           const ref = doc(db, 'users', auth.currentUser.uid);
           await setDoc(ref, { emailVerified: true }, { merge: true });
         }
         
         setSuccess(true);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         setError('The verification link is invalid or has expired.');
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    processVerification();
   }, [location.search]);
 
   return (

@@ -8,6 +8,7 @@ import SearchPage from './pages/Home/SearchPage';
 import MovieDetails from './pages/Home/Movie/MovieDetails';
 import TvDetails from './pages/Home/TV/TvDetails';
 import WatchlistPage from './pages/Home/WatchlistPage';
+import ResetPasswordPage from './pages/Home/ResetPasswordPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/series/watch/:slug" element={<TvDetails />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           {/* Legacy detail URLs (auto-canonicalized in page components) */}
           <Route path="/movie/:slug" element={<MovieDetails />} />
           <Route path="/tv/:slug" element={<TvDetails />} />

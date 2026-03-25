@@ -96,31 +96,48 @@ The app runs at `http://localhost:5173` by default.
 
 ## Project Structure
 
-```
+```text
 src/
 ├── App.jsx                      # Root router & route definitions
 ├── main.jsx                     # React entry point
 ├── index.css                    # Global styles + hide-scrollbar utility
+├── firebase.js                  # Firebase configuration
+├── components/
+│   └── AuthModal.jsx            # Reusable Authentication / Login / Signup Modal
+├── context/
+│   └── WatchlistContext.jsx     # Global Watchlist Context
+├── utils/
+│   └── continueWatching.js      # Utility logic for the Continue Watching feature
 └── pages/Home/
     ├── ParentComponent.jsx      # Layout route — sidebar + scroll-to-top + Outlet
     ├── HomePage.jsx             # Home page — HeroBanner + TrendingRows
     ├── HeroBanner.jsx           # Auto-advancing hero carousel (trending content)
     ├── TrendingRow.jsx          # Horizontal scroll card row
+    ├── PersonalizedRow.jsx      # Row showing personalized suggestions
+    ├── ContinueWatchingRow.jsx  # Row showing user's partially watched content
     ├── ContentGrid.jsx          # Infinite-scroll poster grid (trending or by genre)
-    ├── ContentCard.jsx          # Poster card with rating badge + hover overlay
+    ├── ContentCard.jsx          # Poster card with rating badge + hover/trailer overlay
     ├── Sidebar.jsx              # Collapsible icon sidebar with genre navigation
     ├── SearchPage.jsx           # Search results + genre/category chips
-    ├── Fetcher.js               # All TMDB API calls (trending, discover, details, episodes)
+    ├── WatchlistPage.jsx        # User's saved watchlist view
+    ├── ResetPasswordPage.jsx    # Custom password reset handling via Firebase
+    ├── EmailVerificationPage.jsx# Custom email verification handling via Firebase
+    ├── SEO.jsx                  # Dynamic Meta / SEO tags helper
+    ├── Fetcher.js               # All TMDB API calls (trending, discover, details)
     ├── tmdb.js                  # Genre lists, special category definitions & params
     ├── urlUtils.js              # Slug helpers — toSlug(), toDetailPath()
+    ├── urlFilters.js            # URL param helpers for genres, sorts, etc.
     ├── Movie/
-    │   ├── Movie.jsx            # Movies browse page (trending default, genre + sort filters)
-    │   ├── MovieDetails.jsx     # Movie detail page — hero backdrop, player, production info
-    │   ├── VideoPlayer.jsx      # Movie iframe player (vidlink.pro) with scroll overlay
-    ├── Reused/
-    │   ├── DetailPageSkeleton.jsx # Movies browse page (trending default, genre + sort filters)
-    └── TV/
-        ├── Series.jsx           # TV Shows browse page (trending default, genre + sort filters)
-        ├── TvDetails.jsx        # TV detail page — hero, player, season tabs, episode cards
-        └── VideoPlayer.jsx      # TV iframe player (vidlink.pro) with scroll overlay
+    │   ├── Movie.jsx            # Movies browse page (trending default, filters)
+    │   ├── MovieDetails.jsx     # Movie detail page — hero, player, cast, info
+    │   └── VideoPlayer.jsx      # Movie iframe player (vidlink.pro) with overlay
+    ├── TV/
+    │   ├── Series.jsx           # TV Shows browse page (trending default, filters)
+    │   ├── TvDetails.jsx        # TV detail page — hero, player, seasons, episodes
+    │   └── VideoPlayer.jsx      # TV iframe player (vidlink.pro) with overlay
+    ├── Person/
+    │   └── PersonPage.jsx       # Person details showing their credits and biography
+    └── reused/
+        ├── DetailPageSkeleton.jsx # Unified loading skeletons for details pages
+        └── CastRow.jsx          # Horizontal scroll row for cast & crew
 ```

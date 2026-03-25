@@ -110,17 +110,17 @@ export default function AuthModal({ isOpen, onClose }) {
           await linkWithCredential(result.user, pendingGoogleCred);
           setPendingGoogleCred(null);
           // Refresh user to get updated profile after link
-          await saveUserToFirestore({ ...result.user, displayName: result.user.displayName });
+          saveUserToFirestore({ ...result.user, displayName: result.user.displayName }).catch(console.error);
         } else {
           // Update Firestore on standard login to reflect verified status and last login
-          await saveUserToFirestore(result.user);
+          saveUserToFirestore(result.user).catch(console.error);
         }
       } else {
         // Register new user
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(userCredential.user, { displayName: name });
         // Save to Firestore with the displayName we just set
-        await saveUserToFirestore({ ...userCredential.user, displayName: name });
+        saveUserToFirestore({ ...userCredential.user, displayName: name }).catch(console.error);
         
         // Send verification email
         const { sendEmailVerification } = await import('firebase/auth');
@@ -144,7 +144,7 @@ export default function AuthModal({ isOpen, onClose }) {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       // Save/update user profile in Firestore
-      await saveUserToFirestore(result.user);
+      saveUserToFirestore(result.user).catch(console.error);
       onClose();
     } catch (err) {
       setError(err.message.replace('Firebase:', '').trim());

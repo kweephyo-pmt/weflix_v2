@@ -12,6 +12,7 @@ import WatchlistPage from './pages/Home/WatchlistPage';
 import ResetPasswordPage from './pages/Home/ResetPasswordPage';
 import EmailVerificationPage from './pages/Home/EmailVerificationPage';
 import PersonPage from './pages/Home/Person/PersonPage';
+import AuthActionPage from './pages/Home/AuthActionPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
+          <Route path="/auth-action" element={<AuthActionPage />} />
           {/* Legacy detail URLs (auto-canonicalized in page components) */}
           <Route path="/movie/:slug" element={<MovieDetails />} />
           <Route path="/tv/:slug" element={<TvDetails />} />

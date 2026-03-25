@@ -12,7 +12,7 @@ const VideoPlayer = ({ movieId }) => {
 
     if (!movieId) return null;
 
-    const iframeSrc = `https://vidlink.pro/movie/${movieId}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw&autoplay=false`;
+    const iframeSrc = `https://vidlink.pro/movie/${movieId}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw&autoplay=true`;
 
     return (
         <div className="relative w-full h-full bg-black">
@@ -20,7 +20,7 @@ const VideoPlayer = ({ movieId }) => {
                 <iframe
                     key={iframeSrc}
                     src={iframeSrc}
-                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
+                    allow="fullscreen; picture-in-picture; encrypted-media;"
                     allowFullScreen
                     webkitallowfullscreen="true"
                     mozallowfullscreen="true"

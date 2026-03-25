@@ -12,7 +12,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
 
     if (!tvId) return null;
 
-    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw&autoplay=false`;
+    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw&autoplay=true`;
     
     return (
         <div className="relative w-full h-full bg-black">
@@ -22,7 +22,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
                     src={iframeSrc}
                     title={`TV Show: ${tvId} - S${season}E${episode}`}
                     className="absolute inset-0 w-full h-full border-0"
-                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media;"
+                    allow="fullscreen; picture-in-picture; encrypted-media;"
                     allowFullScreen
                     webkitallowfullscreen="true"
                     mozallowfullscreen="true"

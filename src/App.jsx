@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import ParentComponent from './pages/Home/ParentComponent';
 import HomePage from './pages/Home/HomePage';
 import Movie from './pages/Home/Movie/Movie';
@@ -37,6 +38,7 @@ function App() {
         </Route>
       </Routes>
       <Analytics />
+      <SpeedInsights />
     </Router>
   );
 }

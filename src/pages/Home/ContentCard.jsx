@@ -96,6 +96,8 @@ const ContentCard = memo(({
 
   const handleMouseEnter = useCallback((e) => {
     if (!mediaId || !mediaType) return;
+    // Skip trailer on touch-only devices (mobile/tablet)
+    if (window.matchMedia('(hover: none)').matches) return;
     
     if (e?.currentTarget) {
       const rect = e.currentTarget.getBoundingClientRect();

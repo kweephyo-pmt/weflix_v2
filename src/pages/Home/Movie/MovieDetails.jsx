@@ -356,10 +356,8 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           {/* Subtle Video Player Glow Backdrop */}
           <div className="absolute -inset-1 bg-gradient-to-r from-red-600/30 to-blue-600/30 blur-2xl opacity-50 z-0 rounded-2xl md:rounded-[2rem]"></div>
           
-          <div className="relative z-10 bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl mb-6 ring-1 ring-white/5">
-            <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
-              <MemoizedVideoPlayer key={movieId} movieId={movieId} title={movie.title} />
-            </div>
+          <div className="relative z-10 bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-4 shadow-2xl mb-6 ring-1 ring-white/5">
+            <MemoizedVideoPlayer key={movieId} movieId={movieId} title={movie.title} />
           </div>
         </div>
 

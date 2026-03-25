@@ -603,8 +603,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
           {/* Subtle Video Player Glow Backdrop */}
           <div className="absolute -inset-1 bg-gradient-to-r from-red-600/30 to-blue-600/30 blur-2xl opacity-50 z-0 rounded-2xl md:rounded-[2rem]"></div>
           
-          <div className="relative z-10 bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl ring-1 ring-white/5">
-            <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
+          <div className="relative z-10 bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-4 shadow-2xl ring-1 ring-white/5">
             {playingSeason !== null && playingEpisode !== null ? (
               <MemoizedVideoPlayer
                 tvId={tvId}
@@ -614,11 +613,11 @@ const TvDetails = ({ tvId: tvIdProp }) => {
                 key={`${tvId}-${playingSeason}-${playingEpisode}`}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium">
+              <div className="w-full aspect-video bg-black rounded-xl flex items-center justify-center text-gray-400 font-medium">
                 Select an episode to start watching
               </div>
             )}
-          </div>
+
           
           {/* Controls */}
           {playingSeason !== null && playingEpisode !== null && sortedEpisodes.length > 1 && (

@@ -75,6 +75,7 @@ function Series() {
             ? `Stream ${genre.name} TV shows free on WeFlix. Watch the best ${genre.name.toLowerCase()} series, from binge-worthy dramas to must-watch hits.`
             : 'Stream trending TV shows and series free on WeFlix. Discover the most popular, top-rated, and newest shows across all genres.'
         }
+        url={`https://www.weflix.app${buildBrowsePath('tv', genreId)}`}
       />
       {/* Sticky context header */}
       <div className="sticky top-0 z-40 backdrop-blur-md bg-[#0b0f18]/80 border-b border-white/[0.06]">

@@ -76,6 +76,7 @@ function Movie() {
             ? `Browse and stream ${genre.name} movies free on WeFlix. Discover the best ${genre.name.toLowerCase()} films, from classics to new releases.`
             : 'Browse and stream trending movies free on WeFlix. Discover the most popular, top-rated, and newest films across all genres.'
         }
+        url={`https://www.weflix.app${buildBrowsePath('movie', genreId)}`}
       />
       {/* Sticky context header */}
       <div className="sticky top-0 z-40 backdrop-blur-md bg-[#0b0f18]/80 border-b border-white/[0.06]">
